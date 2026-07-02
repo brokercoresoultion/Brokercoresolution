@@ -5,7 +5,7 @@ import Admin3DBackground from '@/components/Admin3DBackground';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, LayoutDashboard, Users, Settings, Mail, Activity, ArrowUpRight, BarChart as BarChartIcon, FileText, Eye, EyeOff, Calculator } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { apiClient } from '@/lib/apiClient';
@@ -26,9 +26,79 @@ export default function AdminDashboard() {
     return saved ? JSON.parse(saved) : [];
   });
   const [editingBlog, setEditingBlog] = useState<any>(null);
-  const [blogForm, setBlogForm] = useState({ title: '', content: '', coverImage: '', authorName: '', category: '', tags: '' });
+  const [blogForm, setBlogForm] = useState({ title: '', content: '', coverImage: '', authorName: '' });
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, message: '', onConfirm: null });
   const [logs, setLogs] = useState<any[]>([]);
+
+  const [selectedLeads, setSelectedLeads] = useState<string[]>([]);
+  const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
+  const [selectedSubscribers, setSelectedSubscribers] = useState<string[]>([]);
+  const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
+
+  const handleBulkDeleteLeads = async (isQuotes = false) => {
+    const selected = isQuotes ? selectedQuotes : selectedLeads;
+    if (selected.length === 0) return;
+    
+    setConfirmDialog({
+      isOpen: true,
+      message: `Are you sure you want to delete ${selected.length} item(s)?`,
+      onConfirm: async () => {
+        toast.loading(`Deleting ${selected.length} item(s)...`, { id: 'bulk-delete' });
+        try {
+          await supabase.from('leads').delete().in('id', selected);
+          setLeads(leads.filter(l => !selected.includes(l.id)));
+          if (isQuotes) setSelectedQuotes([]);
+          else setSelectedLeads([]);
+          toast.success(`Successfully deleted ${selected.length} item(s)`, { id: 'bulk-delete' });
+          await logAction('Bulk Deleted Leads/Quotes', `Deleted ${selected.length} items`);
+        } catch (e) {
+          toast.error('Failed to delete items', { id: 'bulk-delete' });
+        }
+      }
+    });
+  };
+
+  const handleBulkDeleteSubscribers = async () => {
+    if (selectedSubscribers.length === 0) return;
+    
+    setConfirmDialog({
+      isOpen: true,
+      message: `Are you sure you want to delete ${selectedSubscribers.length} subscriber(s)?`,
+      onConfirm: async () => {
+        toast.loading(`Deleting ${selectedSubscribers.length} subscriber(s)...`, { id: 'bulk-delete' });
+        try {
+          await supabase.from('subscribers').delete().in('id', selectedSubscribers);
+          setSubscribers(subscribers.filter(s => !selectedSubscribers.includes(s.id)));
+          setSelectedSubscribers([]);
+          toast.success(`Successfully deleted ${selectedSubscribers.length} subscriber(s)`, { id: 'bulk-delete' });
+          await logAction('Bulk Deleted Subscribers', `Deleted ${selectedSubscribers.length} subscribers`);
+        } catch (e) {
+          toast.error('Failed to delete subscribers', { id: 'bulk-delete' });
+        }
+      }
+    });
+  };
+
+  const handleBulkDeleteBlogs = async () => {
+    if (selectedBlogs.length === 0) return;
+    
+    setConfirmDialog({
+      isOpen: true,
+      message: `Are you sure you want to delete ${selectedBlogs.length} blog(s)?`,
+      onConfirm: async () => {
+        toast.loading(`Deleting ${selectedBlogs.length} blog(s)...`, { id: 'bulk-delete' });
+        try {
+          await supabase.from('blogs').delete().in('id', selectedBlogs);
+          setBlogs(blogs.filter(b => !selectedBlogs.includes(b.id)));
+          setSelectedBlogs([]);
+          toast.success(`Successfully deleted ${selectedBlogs.length} blog(s)`, { id: 'bulk-delete' });
+          await logAction('Bulk Deleted Blogs', `Deleted ${selectedBlogs.length} blogs`);
+        } catch (e) {
+          toast.error('Failed to delete blogs', { id: 'bulk-delete' });
+        }
+      }
+    });
+  };
 
   const logAction = async (action: string, details: string) => {
     try {
@@ -86,50 +156,25 @@ export default function AdminDashboard() {
           }
         }
 
-        // Fetch Leads from Supabase
-        const { data: dbLeads, error: leadsError } = await supabase
-          .from('leads')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (!leadsError && dbLeads) {
-          setLeads(dbLeads);
-        } else {
-          setLeads([]);
-        }
-        
-        // Fetch Subscribers from Supabase
-        const { data: dbSubscribers, error: subsError } = await supabase
-          .from('subscribers')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        if (!subsError && dbSubscribers) {
-          setSubscribers(dbSubscribers);
-        } else {
-          setSubscribers([]);
-        }
-        
-        // Fetch Blogs from Supabase
-        const { data: dbBlogs, error: blogsError } = await supabase
-          .from('blogs')
-          .select('*')
-          .order('created_at', { ascending: false });
-          
-        if (!blogsError && dbBlogs) {
-          setBlogs(dbBlogs);
-        } else {
-          setBlogs([]);
-        }
+        // Fetch all data in parallel for much faster loading
+        const [
+          { data: dbLeads, error: leadsError },
+          { data: dbSubscribers, error: subsError },
+          { data: dbBlogs, error: blogsError },
+          { data: settingsData },
+          { data: dbLogs }
+        ] = await Promise.all([
+          supabase.from('leads').select('*').order('created_at', { ascending: false }),
+          supabase.from('subscribers').select('*').order('created_at', { ascending: false }),
+          supabase.from('blogs').select('id, created_at, title, author_name, date, category, status, cover_image').order('created_at', { ascending: false }),
+          supabase.from('settings').select('*').eq('key', 'maintenance_mode').single(),
+          supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(100)
+        ]);
 
-        // Fetch settings
-        const { data: settingsData } = await supabase.from('settings').select('*').eq('key', 'maintenance_mode').single();
-        if (settingsData) {
-          setMaintenanceMode(settingsData.value);
-        }
-
-        // Fetch logs
-        const { data: dbLogs } = await supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(100);
+        if (!leadsError && dbLeads) setLeads(dbLeads); else setLeads([]);
+        if (!subsError && dbSubscribers) setSubscribers(dbSubscribers); else setSubscribers([]);
+        if (!blogsError && dbBlogs) setBlogs(dbBlogs); else setBlogs([]);
+        if (settingsData) setMaintenanceMode(settingsData.value);
         if (dbLogs) setLogs(dbLogs);
 
       } catch (err) {
@@ -139,6 +184,40 @@ export default function AdminDashboard() {
     };
 
     initDashboard();
+
+    // Supabase Realtime Subscriptions to auto-update UI without refreshing
+    const leadsSubscription = supabase.channel('public:leads')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, (payload) => {
+        if (payload.eventType === 'INSERT') setLeads(prev => [payload.new, ...prev]);
+        else if (payload.eventType === 'DELETE') setLeads(prev => prev.filter((item: any) => String(item.id) !== String(payload.old.id)));
+        else if (payload.eventType === 'UPDATE') setLeads(prev => prev.map((item: any) => String(item.id) === String(payload.new.id) ? payload.new : item));
+      }).subscribe();
+
+    const subscribersSubscription = supabase.channel('public:subscribers')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'subscribers' }, (payload) => {
+        if (payload.eventType === 'INSERT') setSubscribers(prev => [payload.new, ...prev]);
+        else if (payload.eventType === 'DELETE') setSubscribers(prev => prev.filter((item: any) => String(item.id) !== String(payload.old.id)));
+        else if (payload.eventType === 'UPDATE') setSubscribers(prev => prev.map((item: any) => String(item.id) === String(payload.new.id) ? payload.new : item));
+      }).subscribe();
+
+    const blogsSubscription = supabase.channel('public:blogs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'blogs' }, (payload) => {
+        if (payload.eventType === 'INSERT') setBlogs(prev => [payload.new, ...prev]);
+        else if (payload.eventType === 'DELETE') setBlogs(prev => prev.filter((item: any) => String(item.id) !== String(payload.old.id)));
+        else if (payload.eventType === 'UPDATE') setBlogs(prev => prev.map((item: any) => String(item.id) === String(payload.new.id) ? payload.new : item));
+      }).subscribe();
+
+    const logsSubscription = supabase.channel('public:admin_logs')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'admin_logs' }, (payload) => {
+          setLogs(prev => [payload.new, ...prev].slice(0, 100));
+      }).subscribe();
+
+    return () => {
+      supabase.removeChannel(leadsSubscription);
+      supabase.removeChannel(subscribersSubscription);
+      supabase.removeChannel(blogsSubscription);
+      supabase.removeChannel(logsSubscription);
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -247,6 +326,58 @@ export default function AdminDashboard() {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleDownloadSelected = (type: 'leads' | 'quotes' | 'subscribers' | 'blogs') => {
+    let dataToExport: any[] = [];
+    let headers: string[] = [];
+    let keyMap: string[] = [];
+    let filename = '';
+
+    if (type === 'leads') {
+      dataToExport = leads.filter(l => selectedLeads.includes(l.id));
+      headers = ['Date', 'Name', 'Email', 'Phone', 'Interest', 'Status', 'Message'];
+      keyMap = ['created_at', 'name', 'email', 'phone', 'interest', 'status', 'message'];
+      filename = `selected-leads-${new Date().toISOString().split('T')[0]}.csv`;
+    } else if (type === 'quotes') {
+      dataToExport = leads.filter(l => selectedQuotes.includes(l.id));
+      headers = ['Date', 'Name', 'Email', 'Phone', 'Status', 'Message'];
+      keyMap = ['created_at', 'name', 'email', 'phone', 'status', 'message'];
+      filename = `selected-quotes-${new Date().toISOString().split('T')[0]}.csv`;
+    } else if (type === 'subscribers') {
+      dataToExport = subscribers.filter(s => selectedSubscribers.includes(s.id));
+      headers = ['Date', 'Email'];
+      keyMap = ['created_at', 'email'];
+      filename = `selected-subscribers-${new Date().toISOString().split('T')[0]}.csv`;
+    } else if (type === 'blogs') {
+      dataToExport = blogs.filter(b => selectedBlogs.includes(b.id));
+      headers = ['Date', 'Title', 'Author'];
+      keyMap = ['date', 'title', 'author_name'];
+      filename = `selected-blogs-${new Date().toISOString().split('T')[0]}.csv`;
+    }
+
+    if (dataToExport.length === 0) return;
+
+    const csvRows = [headers.join(',')];
+    dataToExport.forEach((item: any) => {
+      const values = keyMap.map(key => {
+        let val = item[key] || '';
+        if (key === 'created_at' && item.date && !val) val = item.date;
+        return `"${String(val).replace(/"/g, '""')}"`;
+      });
+      csvRows.push(values.join(','));
+    });
+    
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleEditChange = (field: any, value: any) => {
     setEditingLead((prev: any) => ({ ...prev, [field]: value }));
   };
@@ -341,6 +472,22 @@ export default function AdminDashboard() {
       setEditingAdminId(null);
     }
     setShowAdminModal(true);
+  };
+  
+  const handleEditBlog = async (blog: any) => {
+    toast.loading('Loading blog content...', { id: 'fetch-blog' });
+    try {
+      const { data, error } = await supabase.from('blogs').select('content').eq('id', blog.id).single();
+      if (error) throw error;
+      const fullBlog = { ...blog, content: data.content };
+      setEditingBlog(fullBlog);
+      setNewBlog({ ...fullBlog });
+      setShowBlogModal(true);
+      toast.success('Loaded!', { id: 'fetch-blog' });
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to load full blog', { id: 'fetch-blog' });
+    }
   };
   
   const handleDeleteAdmin = async (id: any) => {
@@ -470,35 +617,37 @@ export default function AdminDashboard() {
     }
 
     const isNew = !editingBlog;
-    const insertData = {
+    toast.loading(isNew ? 'Saving blog post...' : 'Updating blog post...', { id: 'save-blog' });
+    const newBlog = {
       title: blogForm.title,
-      slug: blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + (isNew ? `-${Date.now()}` : ''),
+      slug: blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
       content: blogForm.content,
       cover_image: blogForm.coverImage || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3',
+      published_at: isNew ? new Date().toISOString() : editingBlog.published_at,
+      created_at: isNew ? new Date().toISOString() : editingBlog.created_at,
       author_name: blogForm.authorName || 'Admin',
-      category: blogForm.category || 'General',
-      created_at: isNew ? new Date().toISOString() : editingBlog.created_at
+      category: 'Insights'
     };
 
     try {
       if (isNew) {
-        const { data, error } = await supabase.from('blogs').insert(insertData).select();
+        const { data, error } = await supabase.from('blogs').insert(newBlog).select();
         if (error) throw error;
         setBlogs([data[0], ...blogs]);
       } else {
-        const { data, error } = await supabase.from('blogs').update(insertData).eq('id', editingBlog.id).select();
+        const { data, error } = await supabase.from('blogs').update(newBlog).eq('id', editingBlog.id).select();
         if (error) throw error;
         setBlogs(blogs.map((b: any) => String(b.id) === String(editingBlog.id) ? data[0] : b));
       }
 
       const blogTitle = blogForm.title;
       setEditingBlog(null);
-      setBlogForm({ title: '', content: '', coverImage: '', authorName: '', category: '', tags: '' });
-      toast.success(isNew ? 'Blog post created successfully!' : 'Blog post updated successfully!');
+      setBlogForm({ title: '', content: '', coverImage: '', authorName: '' });
+      toast.success(isNew ? 'Blog post created successfully!' : 'Blog post updated successfully!', { id: 'save-blog' });
       
       await logAction(isNew ? 'Created Blog' : 'Updated Blog', `Title: ${blogTitle}`);
     } catch (err: any) {
-      toast.error(err.message || 'Failed to save blog post to database.');
+      toast.error(err.message || 'Failed to save blog post to database.', { id: 'save-blog' });
       console.error(err);
     }
   };
@@ -509,9 +658,38 @@ export default function AdminDashboard() {
         toast.error('Image size must be less than 5MB');
         return;
       }
+      toast.loading('Compressing image...', { id: 'img-compress' });
       const reader = new FileReader();
       reader.onloadend = () => {
-        setBlogForm({ ...blogForm, coverImage: reader.result as string });
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 600;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (ctx) ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          setBlogForm((prev: any) => ({ ...prev, coverImage: dataUrl }));
+          toast.success('Image ready', { id: 'img-compress' });
+        };
+        img.src = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
@@ -522,15 +700,16 @@ export default function AdminDashboard() {
       isOpen: true,
       message: "Are you sure you want to delete this blog post?",
       onConfirm: async () => {
+        toast.loading('Deleting blog post...', { id: 'delete-blog' });
         try {
           await supabase.from('blogs').delete().eq('id', id);
           const updatedBlogs = blogs.filter((b: any) => b.id !== id);
           setBlogs(updatedBlogs);
-          toast.success('Blog deleted successfully!');
+          toast.success('Blog deleted successfully!', { id: 'delete-blog' });
           await logAction('Deleted Blog', `Blog ID: ${id}`);
         } catch (e) {
           console.error('Failed to delete from supabase:', e);
-          toast.error('Failed to delete blog.');
+          toast.error('Failed to delete blog.', { id: 'delete-blog' });
         }
       }
     });
@@ -609,7 +788,19 @@ export default function AdminDashboard() {
           transition={{ duration: 0.4 }}
         >
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Leads & Inquiries</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-white">Leads & Inquiries</h1>
+              {selectedLeads.length > 0 && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleDownloadSelected('leads')} className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg text-sm font-medium transition-colors border border-cyan-500/30">
+                    Download ({selectedLeads.length})
+                  </button>
+                  <button onClick={() => handleBulkDeleteLeads(false)} className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors border border-red-500/30">
+                    Delete ({selectedLeads.length})
+                  </button>
+                </div>
+              )}
+            </div>
             <button onClick={exportLeadsToCSV} className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg text-sm font-medium transition-colors">
               Export CSV
             </button>
@@ -622,8 +813,19 @@ export default function AdminDashboard() {
             <div className="md:hidden space-y-4">
               {leads.filter(l => l.interest !== 'Brokerage Quote').map(lead => (
                 <div key={lead.id} className="bg-black/20 border border-gray-800 rounded-lg p-4 space-y-3">
-                  <div className="flex justify-between items-start">
-                    <div className="overflow-hidden pr-2">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="pt-1">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                        checked={selectedLeads.includes(lead.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedLeads([...selectedLeads, lead.id]);
+                          else setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
+                        }}
+                      />
+                    </div>
+                    <div className="flex-1 overflow-hidden pr-2">
                       <div className="text-white font-medium truncate">{lead.name}</div>
                       <div className="text-gray-400 text-sm truncate">{lead.email}</div>
                       <div className="text-gray-500 text-xs">{lead.phone}</div>
@@ -664,6 +866,18 @@ export default function AdminDashboard() {
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                   <tr className="border-b border-gray-800">
+                    <th className="py-3 px-4 text-gray-400 font-medium w-12">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                        onChange={(e) => {
+                          const nonQuoteLeads = leads.filter(l => l.interest !== 'Brokerage Quote');
+                          if (e.target.checked) setSelectedLeads(nonQuoteLeads.map(l => l.id));
+                          else setSelectedLeads([]);
+                        }}
+                        checked={selectedLeads.length > 0 && selectedLeads.length === leads.filter(l => l.interest !== 'Brokerage Quote').length}
+                      />
+                    </th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Name</th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Email / Phone</th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Interest / Message</th>
@@ -675,6 +889,17 @@ export default function AdminDashboard() {
                 <tbody>
                   {leads.filter(l => l.interest !== 'Brokerage Quote').map((lead: any) => (
                     <tr key={lead.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                      <td className="py-4 px-4">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                          checked={selectedLeads.includes(lead.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedLeads([...selectedLeads, lead.id]);
+                            else setSelectedLeads(selectedLeads.filter(id => id !== lead.id));
+                          }}
+                        />
+                      </td>
                       <td className="py-4 px-4 text-white font-medium">{lead.name}</td>
                       <td className="py-4 px-4">
                         <div className="text-gray-300">{lead.email}</div>
@@ -724,7 +949,19 @@ export default function AdminDashboard() {
           transition={{ duration: 0.4 }}
         >
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Newsletter Subscribers</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-white">Newsletter Subscribers</h1>
+              {selectedSubscribers.length > 0 && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleDownloadSelected('subscribers')} className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg text-sm font-medium transition-colors border border-cyan-500/30">
+                    Download ({selectedSubscribers.length})
+                  </button>
+                  <button onClick={handleBulkDeleteSubscribers} className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors border border-red-500/30">
+                    Delete ({selectedSubscribers.length})
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="text-sm font-medium text-white bg-white/10 px-4 py-2 rounded-lg">
               Total: {subscribers.length}
             </div>
@@ -736,9 +973,22 @@ export default function AdminDashboard() {
               {subscribers.length > 0 ? (
                 subscribers.map((sub) => (
                   <div key={sub.id} className="bg-black/20 border border-gray-800 rounded-lg p-4 flex flex-col gap-3">
-                    <div className="flex justify-between items-center">
-                      <div className="text-white font-medium truncate pr-4 text-sm">{sub.email}</div>
-                      <div className="text-gray-500 text-xs whitespace-nowrap">{sub.date || (sub.created_at ? new Date(sub.created_at).toLocaleDateString() : '')}</div>
+                    <div className="flex justify-between items-start gap-2">
+                      <div className="pt-1">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                          checked={selectedSubscribers.includes(sub.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedSubscribers([...selectedSubscribers, sub.id]);
+                            else setSelectedSubscribers(selectedSubscribers.filter(id => id !== sub.id));
+                          }}
+                        />
+                      </div>
+                      <div className="flex-1 overflow-hidden pr-2 flex justify-between items-center">
+                        <div className="text-white font-medium truncate pr-4 text-sm">{sub.email}</div>
+                        <div className="text-gray-500 text-xs whitespace-nowrap">{sub.date || (sub.created_at ? new Date(sub.created_at).toLocaleDateString() : '')}</div>
+                      </div>
                     </div>
                     <div className="flex gap-4 border-t border-gray-800/50 pt-3">
                       <button onClick={() => setEditingSubscriber(sub)} className="text-cyan-400 text-xs font-medium hover:text-cyan-300">Edit</button>
@@ -756,6 +1006,17 @@ export default function AdminDashboard() {
               <table className="w-full text-left border-collapse min-w-[500px]">
                 <thead>
                   <tr className="border-b border-gray-800">
+                    <th className="py-3 px-4 text-gray-400 font-medium w-12">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedSubscribers(subscribers.map(s => s.id));
+                          else setSelectedSubscribers([]);
+                        }}
+                        checked={selectedSubscribers.length > 0 && selectedSubscribers.length === subscribers.length}
+                      />
+                    </th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Email Address</th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Date Subscribed</th>
                     <th className="py-3 px-4 text-gray-400 font-medium text-right">Actions</th>
@@ -765,6 +1026,17 @@ export default function AdminDashboard() {
                   {subscribers.length > 0 ? (
                     subscribers.map((sub) => (
                       <tr key={sub.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                        <td className="py-4 px-4">
+                          <input 
+                            type="checkbox" 
+                            className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                            checked={selectedSubscribers.includes(sub.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) setSelectedSubscribers([...selectedSubscribers, sub.id]);
+                              else setSelectedSubscribers(selectedSubscribers.filter(id => id !== sub.id));
+                            }}
+                          />
+                        </td>
                         <td className="py-4 px-4 text-white font-medium">{sub.email}</td>
                         <td className="py-4 px-4 text-gray-500">{sub.date || (sub.created_at ? new Date(sub.created_at).toLocaleDateString() : '')}</td>
                         <td className="py-4 px-4 text-right">
@@ -815,13 +1087,36 @@ export default function AdminDashboard() {
       return (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Calculator Quotes</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-white">Calculator Quotes</h1>
+              {selectedQuotes.length > 0 && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleDownloadSelected('quotes')} className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg text-sm font-medium transition-colors border border-cyan-500/30">
+                    Download ({selectedQuotes.length})
+                  </button>
+                  <button onClick={() => handleBulkDeleteLeads(true)} className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors border border-red-500/30">
+                    Delete ({selectedQuotes.length})
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-lg">
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[800px]">
                 <thead>
                   <tr className="border-b border-gray-800">
+                    <th className="py-3 px-4 text-gray-400 font-medium w-12">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedQuotes(quotes.map(q => q.id));
+                          else setSelectedQuotes([]);
+                        }}
+                        checked={selectedQuotes.length > 0 && selectedQuotes.length === quotes.length}
+                      />
+                    </th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Name</th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Email / Phone</th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Status</th>
@@ -832,6 +1127,17 @@ export default function AdminDashboard() {
                 <tbody>
                   {quotes.map((quote) => (
                     <tr key={quote.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                      <td className="py-4 px-4">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                          checked={selectedQuotes.includes(quote.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedQuotes([...selectedQuotes, quote.id]);
+                            else setSelectedQuotes(selectedQuotes.filter(id => id !== quote.id));
+                          }}
+                        />
+                      </td>
                       <td className="py-4 px-4 text-white font-medium">{quote.name}</td>
                       <td className="py-4 px-4">
                         <div className="text-gray-300">{quote.email}</div>
@@ -863,10 +1169,25 @@ export default function AdminDashboard() {
             </div>
             
             <div className="md:hidden space-y-4">
-               {quotes.map(quote => (
+                {quotes.map(quote => (
                  <div key={quote.id} className="bg-black/20 border border-gray-800 rounded-lg p-4 space-y-3">
-                   <div className="text-white font-medium">{quote.name}</div>
-                   <div className="text-gray-400 text-sm">{quote.email}</div>
+                   <div className="flex gap-2">
+                     <div className="pt-1">
+                       <input 
+                         type="checkbox" 
+                         className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                         checked={selectedQuotes.includes(quote.id)}
+                         onChange={(e) => {
+                           if (e.target.checked) setSelectedQuotes([...selectedQuotes, quote.id]);
+                           else setSelectedQuotes(selectedQuotes.filter(id => id !== quote.id));
+                         }}
+                       />
+                     </div>
+                     <div>
+                       <div className="text-white font-medium">{quote.name}</div>
+                       <div className="text-gray-400 text-sm">{quote.email}</div>
+                     </div>
+                   </div>
                    <div className="pt-3 border-t border-gray-800 flex justify-between items-center">
                      <select value={quote.status} onChange={(e) => handleStatusChange(quote.id, e.target.value)} className={`px-2 py-1.5 rounded-lg text-xs font-medium border appearance-none cursor-pointer outline-none ${getStatusColor(quote.status)}`}>
                         <option value="New" className="bg-[#111827] text-white">New</option>
@@ -1477,71 +1798,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Leads over time line chart */}
-          <div className="lg:col-span-3 bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-lg">
-            <h3 className="text-lg font-bold text-white mb-4">Leads Over Time (Last 7 Days)</h3>
-            <div className="h-[300px]">
-              {(() => {
-                // Group leads by date (last 7 days)
-                const last7Days = Array.from({ length: 7 }).map((_, i) => {
-                  const d = new Date();
-                  d.setDate(d.getDate() - (6 - i));
-                  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                });
-                
-                const timeData = last7Days.map(dateStr => {
-                  const count = leads.filter(l => {
-                    if (l.created_at) {
-                      return new Date(l.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) === dateStr;
-                    }
-                    if (l.date) {
-                      return l.date.includes(dateStr) || new Date(l.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) === dateStr;
-                    }
-                    return false;
-                  }).length;
-                  return { date: dateStr, count };
-                });
-
-                return leads.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={timeData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 25 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        stroke="#9CA3AF" 
-                        tick={{ fontSize: 11, fill: '#9CA3AF' }}
-                        tickMargin={10}
-                      />
-                      <YAxis stroke="#9CA3AF" tick={{ fontSize: 12, fill: '#9CA3AF' }} allowDecimals={false} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px', color: '#fff' }} 
-                      />
-                      <Line 
-                        type="monotone" 
-                        dataKey="count" 
-                        stroke="#06b6d4" 
-                        strokeWidth={3}
-                        dot={{ fill: '#06b6d4', r: 4 }}
-                        activeDot={{ r: 6, strokeWidth: 0 }}
-                        isAnimationActive={true}
-                        animationDuration={1500}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex h-full items-center justify-center text-gray-500 font-medium border border-dashed border-gray-800 rounded-xl">
-                    No timeline data available
-                  </div>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-lg">
             <h3 className="text-lg font-bold text-white mb-4">Recent Contact Requests</h3>
@@ -1599,12 +1855,24 @@ export default function AdminDashboard() {
           transition={{ duration: 0.4 }}
         >
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-white">Manage Blogs</h1>
+            <div className="flex items-center gap-4">
+              <h1 className="text-2xl font-bold text-white">Manage Blogs</h1>
+              {selectedBlogs.length > 0 && (
+                <div className="flex gap-2">
+                  <button onClick={() => handleDownloadSelected('blogs')} className="px-3 py-1.5 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg text-sm font-medium transition-colors border border-cyan-500/30">
+                    Download ({selectedBlogs.length})
+                  </button>
+                  <button onClick={handleBulkDeleteBlogs} className="px-3 py-1.5 bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors border border-red-500/30">
+                    Delete ({selectedBlogs.length})
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="flex gap-3">
               <button onClick={() => window.open('/', '_blank')} className="px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                 <ArrowUpRight className="w-4 h-4" /> Visit Website
               </button>
-              <button onClick={() => { setEditingBlog(false); setBlogForm({ title: '', content: '', coverImage: '', authorName: '', category: '', tags: '' }); }} className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg text-sm font-medium transition-colors">
+              <button onClick={() => { setEditingBlog(false); setBlogForm({ title: '', content: '', coverImage: '', authorName: '' }); }} className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg text-sm font-medium transition-colors">
                 + Create New Blog
               </button>
             </div>
@@ -1621,14 +1889,6 @@ export default function AdminDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Author Name</label>
                   <input type="text" value={blogForm.authorName || ''} onChange={e => setBlogForm({...blogForm, authorName: e.target.value})} placeholder="e.g. David Chen" className="w-full bg-black/20 border border-white/10 backdrop-blur-sm text-white rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-400" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Category</label>
-                  <input type="text" value={blogForm.category} onChange={e => setBlogForm({...blogForm, category: e.target.value})} placeholder="e.g. Market Analysis" className="w-full bg-black/20 border border-white/10 backdrop-blur-sm text-white rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-400" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Tags (comma separated)</label>
-                  <input type="text" value={blogForm.tags} onChange={e => setBlogForm({...blogForm, tags: e.target.value})} placeholder="e.g. Forex, Trading, Platform" className="w-full bg-black/20 border border-white/10 backdrop-blur-sm text-white rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-400" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Cover Image</label>
@@ -1659,10 +1919,25 @@ export default function AdminDashboard() {
             <div className="md:hidden space-y-4">
               {blogs.length > 0 ? blogs.map((blog: any) => (
                 <div key={blog.id} className="bg-black/20 border border-gray-800 rounded-lg p-4 space-y-3">
-                  <div className="text-white font-medium truncate">{blog.title}</div>
-                  <div className="text-gray-500 text-xs">{blog.date}</div>
+                  <div className="flex gap-2">
+                    <div className="pt-1">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                        checked={selectedBlogs.includes(blog.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedBlogs([...selectedBlogs, blog.id]);
+                          else setSelectedBlogs(selectedBlogs.filter(id => id !== blog.id));
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium truncate">{blog.title}</div>
+                      <div className="text-gray-500 text-xs">{blog.date}</div>
+                    </div>
+                  </div>
                   <div className="pt-3 border-t border-gray-800 flex justify-end gap-2">
-                    <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name, category: blog.category || '', tags: blog.tags ? (Array.isArray(blog.tags) ? blog.tags.join(', ') : blog.tags) : '' }); }} className="text-cyan-400 hover:text-cyan-400 text-xs font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors">Edit</button>
+                    <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name }); }} className="text-cyan-400 hover:text-cyan-400 text-xs font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors">Edit</button>
                     <button onClick={() => handleDeleteBlog(blog.id)} className="text-red-500 hover:text-red-400 text-xs font-medium px-3 py-1.5 border border-red-500/30 hover:border-red-400 rounded-lg transition-colors">Delete</button>
                   </div>
                 </div>
@@ -1676,6 +1951,17 @@ export default function AdminDashboard() {
               <table className="w-full text-left border-collapse min-w-[500px]">
                 <thead>
                   <tr className="border-b border-gray-800">
+                    <th className="py-3 px-4 text-gray-400 font-medium w-12">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedBlogs(blogs.map(b => b.id));
+                          else setSelectedBlogs([]);
+                        }}
+                        checked={selectedBlogs.length > 0 && selectedBlogs.length === blogs.length}
+                      />
+                    </th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Title</th>
                     <th className="py-3 px-4 text-gray-400 font-medium text-right">Date</th>
                     <th className="py-3 px-4 text-gray-400 font-medium text-right">Actions</th>
@@ -1684,10 +1970,21 @@ export default function AdminDashboard() {
                 <tbody>
                   {blogs.length > 0 ? blogs.map((blog: any) => (
                     <tr key={blog.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
+                      <td className="py-4 px-4">
+                        <input 
+                          type="checkbox" 
+                          className="rounded border-gray-600 bg-black/50 text-cyan-400 focus:ring-cyan-400"
+                          checked={selectedBlogs.includes(blog.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedBlogs([...selectedBlogs, blog.id]);
+                            else setSelectedBlogs(selectedBlogs.filter(id => id !== blog.id));
+                          }}
+                        />
+                      </td>
                       <td className="py-4 px-4 text-white font-medium">{blog.title}</td>
                       <td className="py-4 px-4 text-gray-500 text-right">{blog.date}</td>
                       <td className="py-4 px-4 text-right">
-                        <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name, category: blog.category || '', tags: blog.tags ? (Array.isArray(blog.tags) ? blog.tags.join(', ') : blog.tags) : '' }); }} className="text-cyan-400 hover:text-cyan-400 text-sm font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors mr-2">Edit</button>
+                        <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name }); }} className="text-cyan-400 hover:text-cyan-400 text-sm font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors mr-2">Edit</button>
                         <button onClick={() => handleDeleteBlog(blog.id)} className="text-red-500 hover:text-red-400 text-sm font-medium px-3 py-1.5 border border-red-500/30 hover:border-red-400 rounded-lg transition-colors">Delete</button>
                       </td>
                     </tr>
@@ -1845,9 +2142,17 @@ export default function AdminDashboard() {
           </motion.div>
         )}
       </AnimatePresence>
+      <AnimatePresence>
       {editingLead && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl w-full max-w-lg p-6 shadow-2xl relative my-auto max-h-[90vh] overflow-y-auto">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-[100] p-4 overflow-y-auto"
+        >
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 10 }}
+            transition={{ type: "spring", damping: 25, stiffness: 400 }}
+            className="bg-[#0f172a] border border-cyan-500/20 rounded-2xl w-full max-w-lg p-6 shadow-[0_0_50px_rgba(6,182,212,0.1)] relative my-auto max-h-[90vh] overflow-y-auto"
+          >
             <h2 className="text-xl font-bold text-white mb-6">Edit Lead</h2>
             <div className="space-y-4">
               <div>
@@ -1918,9 +2223,10 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
     </div>
   );

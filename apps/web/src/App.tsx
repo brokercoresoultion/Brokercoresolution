@@ -4,10 +4,8 @@ import Layout from '@/components/Layout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Analytics } from '@vercel/analytics/react';
-import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Toaster } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
-import GlobalPreloader from '@/components/GlobalPreloader';
 
 // Static imports for core pages to ensure INSTANT navigation (zero latency)
 import Home from '@/pages/Home';
@@ -26,9 +24,6 @@ const RefundPolicy = React.lazy(() => import('@/pages/RefundPolicy'));
 const AMLPolicy = React.lazy(() => import('@/pages/AMLPolicy'));
 const AdminLogin = React.lazy(() => import('@/pages/Admin/AdminLogin'));
 const AdminDashboard = React.lazy(() => import('@/pages/Admin/AdminDashboard'));
-const ClientLogin = React.lazy(() => import('@/pages/Client/ClientLogin'));
-const ClientDashboard = React.lazy(() => import('@/pages/Client/ClientDashboard'));
-const NotFound = React.lazy(() => import('@/pages/NotFound'));
 
 function PageLoader() {
   return (
@@ -118,17 +113,12 @@ function App() {
 
   return (
     <>
-      <GlobalPreloader />
       <AnimatePresence mode="wait">
         <Suspense fallback={<PageLoader />}>
           <Routes location={location} key={location.pathname}>
             {/* Admin Routes (Without Main Layout) */}
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-            {/* Client Routes (Without Main Layout) */}
-            <Route path="/client/login" element={<ClientLogin />} />
-            <Route path="/client/dashboard" element={<ClientDashboard />} />
 
             {/* Public Routes (With Main Layout) */}
             <Route path="/" element={<Layout />}>
@@ -147,15 +137,40 @@ function App() {
               <Route path="aml-policy" element={<AMLPolicy />} />
               <Route path="services/:serviceId" element={<ServiceDetail />} />
             </Route>
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
       </AnimatePresence>
       {!isAdminRoute && <WhatsAppButton />}
       <Analytics />
-      <SpeedInsights />
-      <Toaster position="top-center" toastOptions={{ className: 'bg-gray-900 text-white border border-gray-800' }} />
+      <Toaster 
+        position="top-center" 
+        toastOptions={{ 
+          duration: 4000,
+          style: {
+            background: 'rgba(17, 24, 39, 0.8)',
+            backdropFilter: 'blur(12px)',
+            color: '#fff',
+            border: '1px solid rgba(6, 182, 212, 0.2)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(6, 182, 212, 0.1)',
+            borderRadius: '16px',
+            padding: '16px 24px',
+            fontSize: '15px',
+            fontWeight: 500,
+          },
+          success: {
+            iconTheme: {
+              primary: '#06b6d4',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          }
+        }} 
+      />
     </>
   );
 }
