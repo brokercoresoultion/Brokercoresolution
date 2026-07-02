@@ -7,6 +7,7 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Toaster } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
+import GlobalPreloader from '@/components/GlobalPreloader';
 
 // Static imports for core pages to ensure INSTANT navigation (zero latency)
 import Home from '@/pages/Home';
