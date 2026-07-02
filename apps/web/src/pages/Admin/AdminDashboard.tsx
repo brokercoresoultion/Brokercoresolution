@@ -472,7 +472,7 @@ export default function AdminDashboard() {
     const isNew = !editingBlog;
     const insertData = {
       title: blogForm.title,
-      slug: blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
+      slug: blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + (isNew ? `-${Date.now()}` : ''),
       content: blogForm.content,
       cover_image: blogForm.coverImage || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3',
       author_name: blogForm.authorName || 'Admin',

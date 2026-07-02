@@ -117,6 +117,7 @@ function App() {
 
   return (
     <>
+      <GlobalPreloader />
       <AnimatePresence mode="wait">
         <Suspense fallback={<PageLoader />}>
           <Routes location={location} key={location.pathname}>
