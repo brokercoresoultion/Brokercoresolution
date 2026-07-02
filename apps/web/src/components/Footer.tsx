@@ -80,7 +80,6 @@ const Footer = () => {
 
             const newSubscriber = {
                 email: data.email,
-                status: 'Active',
             };
 
             const { error: insertError } = await supabase.from('subscribers').insert(newSubscriber);
@@ -93,6 +92,7 @@ const Footer = () => {
             });
             reset();
         } catch (error) {
+            console.error("Subscription error details:", error);
             toast({
                 title: "Error",
                 description: "Failed to subscribe. Please try again.",
