@@ -486,11 +486,11 @@ export default function AdminDashboard() {
 
     try {
       if (isNew) {
-        const { data, error } = await supabase.from('blogs').insert(newBlog).select();
+        const { data, error } = await supabase.from('blogs').insert(insertData).select();
         if (error) throw error;
         setBlogs([data[0], ...blogs]);
       } else {
-        const { data, error } = await supabase.from('blogs').update(newBlog).eq('id', editingBlog.id).select();
+        const { data, error } = await supabase.from('blogs').update(insertData).eq('id', editingBlog.id).select();
         if (error) throw error;
         setBlogs(blogs.map((b: any) => String(b.id) === String(editingBlog.id) ? data[0] : b));
       }
