@@ -41,8 +41,6 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../../dist',
-    emptyOutDir: true,
     target: 'esnext',
     minify: 'terser',
     terserOptions: {
