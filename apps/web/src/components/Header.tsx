@@ -209,7 +209,7 @@ const Header = ({ openDemoModal }: { openDemoModal?: () => void }) => {
     <>
       <div className="fixed top-0 left-0 w-full z-[9990] pointer-events-none">
         <motion.header
-          className={`pointer-events-auto transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] w-full ${isScrolled
+          className={`pointer-events-auto transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] w-full ${isScrolled
             ? 'bg-[#09090b]/90 backdrop-blur-2xl border-b border-white/10 shadow-lg py-3'
             : 'bg-transparent py-5'
             }`}
