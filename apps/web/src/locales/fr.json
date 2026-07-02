@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "services": "Services",
+    "company": "Entreprise",
+    "about": "À Propos",
+    "contact": "Contactez-Nous",
+    "faq": "FAQ",
+    "calculator": "Calculatrice de Courtage",
+    "blog": "Blog",
+    "getStarted": "Commencer",
+    "language": "Langue"
+  },
+  "hero": {
+    "eyebrow": "Solutions de Courtage Clés en Main",
+    "headingLine1": "Lancez votre Courtage",
+    "headingLine2": "Institutionnel en Marque Blanche,",
+    "headingAccent": "Conçu pour l'Échelle",
+    "subheading": "Accélérez votre mise sur le marché avec une infrastructure MT5 complète, une agrégation de liquidité Tier-1, des portails CRM avancés et une configuration juridique rapide FSC/CySEC.",
+    "ctaPrimary": "Planifier une Consultation",
+    "ctaSecondary": "Explorer les Solutions",
+    "stat1Value": "Tier-1",
+    "stat1Label": "Liquidité",
+    "stat2Value": "<1ms",
+    "stat2Label": "Latence d'Exécution",
+    "stat3Value": "100%",
+    "stat3Label": "Configuration Totale",
+    "liveMarkets": "Systèmes Opérationnels"
+  }
+}

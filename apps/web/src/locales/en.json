@@ -1,0 +1,36 @@
+{
+  "nav": {
+    "home": "Home",
+    "solutions": "Solutions",
+    "platform": "Platform",
+    "crm": "CRM",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "login": "Client Login",
+    "requestDemo": "Request Demo",
+    "language": "Language",
+    "services": "Services",
+    "company": "Company",
+    "about": "About Us",
+    "contact": "Contact",
+    "faq": "FAQ",
+    "calculator": "Calculator",
+    "getStarted": "Get Started"
+  },
+  "hero": {
+    "eyebrow": "End-to-End Turnkey Brokerage Solutions",
+    "headingLine1": "LAUNCH YOUR FOREX BROKERAGE.",
+    "headingLine2": "GLOBALLY.",
+    "headingAccent": "INSTANT TURNKEY SOLUTIONS.",
+    "subheading": "Accelerate your time-to-market with complete MT5 infrastructure, Tier-1 liquidity aggregation, advanced CRM portals, and fast-track compliance.",
+    "ctaPrimary": "Book a Strategy Call",
+    "ctaSecondary": "Explore Platform",
+    "stat1Value": "Tier-1",
+    "stat1Label": "Liquidity",
+    "stat2Value": "<1ms",
+    "stat2Label": "Execution Latency",
+    "stat3Value": "100%",
+    "stat3Label": "Turnkey Setup",
+    "liveMarkets": "Systems Operational"
+  }
+}

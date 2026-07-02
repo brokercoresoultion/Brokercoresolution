@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: always
+    networks:
+      - broker-net
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - REDIS_URL=redis://cache:6379
+      - JWT_SECRET=super-secret-enterprise-key-change-in-prod
+    depends_on:
+      - cache
+    restart: always
+    networks:
+      - broker-net
+
+  cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: always
+    networks:
+      - broker-net
+
+networks:
+  broker-net:
+    driver: bridge
+
+volumes:
+  redis_data:

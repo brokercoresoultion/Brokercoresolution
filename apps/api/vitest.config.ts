@@ -1,0 +1,20 @@
+/// <reference types="vitest" />
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    globals: true,
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      thresholds: {
+        lines: 90,
+        functions: 90,
+        branches: 90,
+        statements: 90
+      }
+    },
+    include: ['src/**/*.{test,spec}.{js,ts}']
+  }
+});

@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "company": "Empresa",
+    "about": "Sobre Nosotros",
+    "contact": "Contáctenos",
+    "faq": "Preguntas Frecuentes",
+    "calculator": "Calculadora de Corretaje",
+    "blog": "Blog",
+    "getStarted": "Comenzar",
+    "language": "Idioma"
+  },
+  "hero": {
+    "eyebrow": "Soluciones de Corretaje Llave en Mano",
+    "headingLine1": "Lanza tu Corretaje",
+    "headingLine2": "Institucional de Marca Blanca,",
+    "headingAccent": "Diseñado para Escalar",
+    "subheading": "Acelere su tiempo de comercialización con infraestructura MT5 completa, agregación de liquidez Tier-1, portales CRM avanzados y configuración legal rápida de FSC/CySEC.",
+    "ctaPrimary": "Programar Consulta",
+    "ctaSecondary": "Explorar Soluciones",
+    "stat1Value": "Tier-1",
+    "stat1Label": "Liquidez",
+    "stat2Value": "<1ms",
+    "stat2Label": "Latencia de Ejecución",
+    "stat3Value": "100%",
+    "stat3Label": "Configuración Total",
+    "liveMarkets": "Sistemas Operativos"
+  }
+}

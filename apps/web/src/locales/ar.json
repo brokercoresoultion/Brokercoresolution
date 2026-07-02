@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "services": "الخدمات",
+    "company": "الشركة",
+    "about": "معلومات عنا",
+    "contact": "اتصل بنا",
+    "faq": "الأسئلة الشائعة",
+    "calculator": "حاسبة الوساطة",
+    "blog": "المدونة",
+    "getStarted": "ابدأ الآن",
+    "language": "اللغة"
+  },
+  "hero": {
+    "eyebrow": "حلول وساطة متكاملة وجاهزة",
+    "headingLine1": "أطلق شركة وساطة",
+    "headingLine2": "مؤسسية بعلامتك التجارية،",
+    "headingAccent": "مصممة للنمو",
+    "subheading": "سرّع دخولك إلى السوق مع بنية تحتية متكاملة لـ MT5، وتجميع سيولة من المستوى الأول (Tier-1)، وبوابات CRM متقدمة، وتأسيس قانوني سريع لتراخيص FSC/CySEC.",
+    "ctaPrimary": "احجز استشارة",
+    "ctaSecondary": "استكشف الحلول",
+    "stat1Value": "Tier-1",
+    "stat1Label": "مزودي السيولة",
+    "stat2Value": "<1ms",
+    "stat2Label": "زمن التنفيذ",
+    "stat3Value": "100%",
+    "stat3Label": "إعداد جاهز",
+    "liveMarkets": "الأنظمة تعمل"
+  }
+}

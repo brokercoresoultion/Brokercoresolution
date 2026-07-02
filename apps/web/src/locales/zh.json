@@ -1,0 +1,30 @@
+{
+  "nav": {
+    "home": "主页",
+    "services": "服务",
+    "company": "公司",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "faq": "常见问题",
+    "calculator": "经纪计算器",
+    "blog": "博客",
+    "getStarted": "开始",
+    "language": "语言"
+  },
+  "hero": {
+    "eyebrow": "端到端交钥匙经纪解决方案",
+    "headingLine1": "推出您的机构级",
+    "headingLine2": "白标经纪业务，",
+    "headingAccent": "为规模而设计",
+    "subheading": "通过完整的 MT5 基础设施、一级流动性聚合、高级 CRM 门户和快速的 FSC/CySEC 法律合规设置，加快您的上市时间。",
+    "ctaPrimary": "安排咨询",
+    "ctaSecondary": "探索解决方案",
+    "stat1Value": "一级 (Tier-1)",
+    "stat1Label": "流动性",
+    "stat2Value": "<1ms",
+    "stat2Label": "执行延迟",
+    "stat3Value": "100%",
+    "stat3Label": "交钥匙设置",
+    "liveMarkets": "系统运行中"
+  }
+}
