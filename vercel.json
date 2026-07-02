@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build -w web",
-  "outputDirectory": "apps/web/dist",
+  "buildCommand": "npm run build -w web && rm -rf dist && cp -r apps/web/dist dist",
   "installCommand": "npm install --include=dev",
   "framework": "vite",
   "headers": [
