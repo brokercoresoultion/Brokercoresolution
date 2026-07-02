@@ -5,10 +5,10 @@ const GlobalPreloader = () => {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // Show for 1.8 seconds on initial load to ensure a premium entry feel
+    // Show for 600ms on initial load so it feels extremely snappy and fast
     const timer = setTimeout(() => {
       setShow(false);
-    }, 1800);
+    }, 600);
     return () => clearTimeout(timer);
   }, []);
 
@@ -26,25 +26,25 @@ const GlobalPreloader = () => {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[50vw] h-[50vw] max-w-[500px] max-h-[500px] bg-accent-cyan/10 rounded-full blur-[100px] pointer-events-none" />
           
           <motion.div
-            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            initial={{ opacity: 0, scale: 0.8, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.4, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
             className="relative z-10 flex flex-col items-center"
           >
             {/* Logo Icon */}
-            <div className="w-24 h-24 mb-8 rounded-3xl bg-gradient-to-br from-accent-cyan via-white/20 to-transparent p-[2px] shadow-[0_0_60px_rgba(6,182,212,0.2)]">
+            <div className="w-20 h-20 mb-6 rounded-3xl bg-gradient-to-br from-accent-cyan via-white/20 to-transparent p-[2px] shadow-[0_0_60px_rgba(6,182,212,0.2)]">
               <div className="w-full h-full bg-[#050B14] rounded-[22px] flex items-center justify-center relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-tr from-accent-cyan/10 to-transparent"></div>
-                <span className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-accent-cyan relative z-10">BC</span>
+                <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-white to-accent-cyan relative z-10">BC</span>
               </div>
             </div>
             
             {/* Text Logo */}
             <motion.h2 
               initial={{ opacity: 0, letterSpacing: '0em' }}
-              animate={{ opacity: 1, letterSpacing: '0.1em' }}
-              transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
-              className="text-2xl md:text-3xl font-extrabold text-white uppercase flex items-center gap-1"
+              animate={{ opacity: 1, letterSpacing: '0.05em' }}
+              transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+              className="text-xl md:text-2xl font-extrabold text-white uppercase flex items-center gap-1"
             >
               Broker<span className="text-accent-cyan">Core</span>
             </motion.h2>
@@ -52,17 +52,17 @@ const GlobalPreloader = () => {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.8 }}
-              className="text-gray-500 text-xs mt-3 uppercase tracking-[0.3em]"
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="text-gray-500 text-[10px] mt-2 uppercase tracking-[0.2em]"
             >
-              Initializing Workspace
+              Initializing
             </motion.p>
             
             {/* Minimalist Progress Line */}
             <motion.div 
               initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: 160 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              animate={{ opacity: 1, width: 120 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
               className="mt-10 h-[2px] bg-white/10 rounded-full overflow-hidden relative"
             >
               <motion.div 

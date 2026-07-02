@@ -32,13 +32,13 @@ const Layout = () => {
       </Helmet>
       <div className="home-scroll-container min-h-screen bg-[#0B0B0B] text-white overflow-x-hidden flex flex-col relative">
         <div className="fixed inset-0 z-0 pointer-events-none">
-          {(!mounted) ? (
+          {(!mounted || isMobile) ? (
             <div className="absolute inset-0 overflow-hidden opacity-30">
               <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[70%] bg-cyan-400/20 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '4s' }} />
               <div className="absolute bottom-[-10%] right-[-20%] w-[70%] h-[70%] bg-white/20 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
             </div>
           ) : (
-            <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
+            <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }} camera={{ position: [0, 0, 8], fov: 45 }}>
               <Suspense fallback={null}>
                 <Global3DScene />
               </Suspense>
