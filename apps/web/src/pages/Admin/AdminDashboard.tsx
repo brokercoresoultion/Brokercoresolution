@@ -475,12 +475,8 @@ export default function AdminDashboard() {
       slug: blogForm.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''),
       content: blogForm.content,
       cover_image: blogForm.coverImage || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3',
-      author_id: currentAdmin?.id || currentAdmin?._id,
       author_name: blogForm.authorName || 'Admin',
       category: blogForm.category || 'General',
-      tags: blogForm.tags ? blogForm.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
-      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-      published_at: isNew ? new Date().toISOString() : editingBlog.published_at,
       created_at: isNew ? new Date().toISOString() : editingBlog.created_at
     };
 
