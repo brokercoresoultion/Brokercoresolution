@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Toaster } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
 
@@ -142,6 +143,7 @@ function App() {
       </AnimatePresence>
       {!isAdminRoute && <WhatsAppButton />}
       <Analytics />
+      <SpeedInsights />
       <Toaster 
         position="top-center" 
         toastOptions={{ 
