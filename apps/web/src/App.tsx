@@ -1,20 +1,23 @@
 import React, { useEffect, useState, Suspense } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import WhatsAppButton from '@/components/WhatsAppButton';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from 'react-hot-toast';
 import { supabase } from '@/lib/supabase';
+import { ReactLenis } from 'lenis/react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
-// Static imports for core pages to ensure INSTANT navigation (zero latency)
+// Static imports for core pages
 import Home from '@/pages/Home';
-import Contact from '@/pages/Contact';
-import BrokerSetupCalculator from '@/pages/BrokerSetupCalculator';
-import AboutUs from '@/pages/AboutUs';
-import ServiceDetail from '@/pages/ServiceDetail';
 
 // Lazy loading for secondary/heavy pages
+const Contact = React.lazy(() => import('@/pages/Contact'));
+const BrokerSetupCalculator = React.lazy(() => import('@/pages/BrokerSetupCalculator'));
+const AboutUs = React.lazy(() => import('@/pages/AboutUs'));
+const ServiceDetail = React.lazy(() => import('@/pages/ServiceDetail'));
+
 const Project = React.lazy(() => import('@/pages/Project'));
 const Blog = React.lazy(() => import('@/pages/Blog'));
 const BlogPost = React.lazy(() => import('@/pages/BlogPost'));
@@ -22,8 +25,47 @@ const PrivacyPolicy = React.lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsAndConditions = React.lazy(() => import('@/pages/TermsAndConditions'));
 const RefundPolicy = React.lazy(() => import('@/pages/RefundPolicy'));
 const AMLPolicy = React.lazy(() => import('@/pages/AMLPolicy'));
+const NotFound = React.lazy(() => import('@/pages/NotFound'));
+const ROICalculator = React.lazy(() => import('@/pages/ROICalculator'));
 const AdminLogin = React.lazy(() => import('@/pages/Admin/AdminLogin'));
 const AdminDashboard = React.lazy(() => import('@/pages/Admin/AdminDashboard'));
+
+function SplashScreen({ onComplete }: { onComplete: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, filter: "blur(10px)" }}
+      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed inset-0 z-[10000] bg-[#020617] flex flex-col items-center justify-center"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="flex flex-col items-center"
+      >
+        <div className="relative mb-6">
+          <div className="absolute inset-0 bg-cyan-500 blur-3xl opacity-20 rounded-full animate-pulse" />
+          <img src="/logo.png" alt="BrokerCore" className="relative w-24 h-24 bg-white p-2 rounded-2xl shadow-2xl shadow-cyan-500/20" />
+        </div>
+        <div className="text-3xl font-black tracking-widest text-white mb-2 uppercase">
+          BrokerCore
+        </div>
+        <div className="text-cyan-400 text-sm font-semibold tracking-[0.3em] uppercase mb-8">
+          Enterprise Solutions
+        </div>
+        <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden relative">
+          <motion.div
+            initial={{ x: "-100%" }}
+            animate={{ x: "100%" }}
+            transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity }}
+            className="absolute inset-0 w-1/2 h-full bg-gradient-to-r from-transparent via-cyan-400 to-transparent rounded-full"
+          />
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
 
 function PageLoader() {
   return (
@@ -86,7 +128,46 @@ function MaintenanceMode() {
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isMaintenance, setIsMaintenance] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+
+  // Secret Admin Login Shortcut (Type 'brokercore' or Ctrl+Shift+A)
+  useEffect(() => {
+    let keyBuffer = '';
+    const secretWord = 'brokercore';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Shortcut 1: Ctrl + Shift + A
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        navigate('/admin', { state: { secretAccess: true } });
+        return;
+      }
+
+      // Shortcut 2: Type 'admin'
+      if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        keyBuffer += e.key.toLowerCase();
+        if (keyBuffer.length > secretWord.length) {
+          keyBuffer = keyBuffer.slice(-secretWord.length);
+        }
+        if (keyBuffer === secretWord) {
+          navigate('/admin', { state: { secretAccess: true } });
+          keyBuffer = '';
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [navigate]);
+
+  useEffect(() => {
+    // Hide splash screen after 0.5 seconds
+    const splashTimer = setTimeout(() => {
+      setShowSplash(false);
+    }, 500);
+    return () => clearTimeout(splashTimer);
+  }, []);
 
   useEffect(() => {
     // Check maintenance mode, but allow access to admin paths
@@ -112,13 +193,23 @@ function App() {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <>
+    <ReactLenis root options={{ lerp: 0.08, smoothWheel: true }}>
+      <AnimatePresence>
+        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      </AnimatePresence>
       <AnimatePresence mode="wait">
         <Suspense fallback={<PageLoader />}>
           <Routes location={location} key={location.pathname}>
             {/* Admin Routes (Without Main Layout) */}
             <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
 
             {/* Public Routes (With Main Layout) */}
             <Route path="/" element={<Layout />}>
@@ -136,6 +227,8 @@ function App() {
               <Route path="refund-policy" element={<RefundPolicy />} />
               <Route path="aml-policy" element={<AMLPolicy />} />
               <Route path="services/:serviceId" element={<ServiceDetail />} />
+              <Route path="roi-calculator" element={<ROICalculator />} />
+              <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>
         </Suspense>
@@ -171,7 +264,7 @@ function App() {
           }
         }} 
       />
-    </>
+    </ReactLenis>
   );
 }
 

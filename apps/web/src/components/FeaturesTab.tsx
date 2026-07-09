@@ -9,7 +9,7 @@ const TABS = [
     icon: Monitor,
     title: 'Trading Platforms',
     description: 'Launch instantly with the world’s most trusted trading platforms. Our MT4 and MT5 white-label solutions include fully customized branding, advanced charting tools, and seamless server configuration designed for high-frequency trading.',
-    benefits: ['Zero-latency execution', 'Custom brand integration', 'Mobile & Web ready'],
+    benefits: ['optimized execution', 'Custom brand integration', 'Mobile & Web ready'],
     image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop'
   },
   {
@@ -24,9 +24,9 @@ const TABS = [
     id: 'liquidity-provider',
     icon: LineChart,
     title: 'Deep Liquidity',
-    description: 'Connect to Tier-1 liquidity pools with ultra-low latency. We deploy advanced FIX API bridges and aggregators that ensure deep market depth, tighter spreads, and minimal slippage for your most demanding institutional clients.',
-    benefits: ['Tier-1 Bank Feeds', 'FIX API Integration', 'Sub-millisecond routing'],
-    image: 'https://images.unsplash.com/photo-1642543492481-44e81e391452?q=80&w=2070&auto=format&fit=crop'
+    description: 'Connect to Institutional liquidity pools with optimized latency. We deploy advanced FIX API bridges and aggregators that ensure deep market depth, tighter spreads, and minimal slippage for your most demanding institutional clients.',
+    benefits: ['Institutional Bank Feeds', 'FIX API Integration', 'Sub-millisecond routing'],
+    image: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?q=80&w=2070&auto=format&fit=crop'
   },
   {
     id: 'gateway-solutions',
@@ -111,9 +111,9 @@ const FeaturesTab = () => {
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeTab.id}
-                initial={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
-                animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
                 transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-[#0f172a]/40 border border-white/[0.05] rounded-3xl p-8 lg:p-12 backdrop-blur-xl h-full shadow-2xl relative overflow-hidden"
               >

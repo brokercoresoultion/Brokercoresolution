@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 
-const SectionAnimator = ({ children, className }) => {
+interface SectionAnimatorProps {
+  children: ReactNode;
+  className?: string;
+}
+
+const SectionAnimator = ({ children, className = '' }: SectionAnimatorProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 50 }}

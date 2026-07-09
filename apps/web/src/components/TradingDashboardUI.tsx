@@ -96,8 +96,8 @@ const TradingDashboardUI = () => {
           <div className="flex items-end gap-4">
             <motion.h3 
               key={Math.floor(profit / 50)} 
-              initial={{ scale: 1.05, filter: 'blur(4px)', color: '#00E5FF' }}
-              animate={{ scale: 1, filter: 'blur(0px)', color: '#ffffff' }}
+              initial={{ scale: 1.05, color: '#00E5FF' }}
+              animate={{ scale: 1, color: '#ffffff' }}
               transition={{ duration: 0.3 }}
               className="text-5xl font-[900] font-mono tracking-tighter drop-shadow-lg"
             >
@@ -183,9 +183,9 @@ const TradingDashboardUI = () => {
             {orders.map((order) => (
               <motion.div
                 key={order.id}
-                initial={{ opacity: 0, x: 50, scale: 0.8, filter: 'blur(5px)' }}
-                animate={{ opacity: 1, x: 0, scale: 1, filter: 'blur(0px)' }}
-                exit={{ opacity: 0, scale: 0.8, y: -20, filter: 'blur(5px)' }}
+                initial={{ opacity: 0, x: 50, scale: 0.8 }}
+                animate={{ opacity: 1, x: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8, y: -20 }}
                 transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                 className="bg-[#0f172a]/80 backdrop-blur-xl border border-white/10 rounded-xl p-3 flex items-center justify-between shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden relative"
               >

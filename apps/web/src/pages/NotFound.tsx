@@ -1,66 +1,57 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Home, ServerCrash } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Home, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
+  useEffect(() => {
+    document.title = '404 - Page Not Found | BrokerCore Solution';
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#020617] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Background FX */}
-      <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-accent-cyan/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[30vw] h-[30vw] bg-white/5 rounded-full blur-[120px] pointer-events-none" />
-      
-      <div className="relative z-10 max-w-2xl text-center">
+      {/* Background Ambience */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-accent-cyan/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative z-10 text-center max-w-2xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          className="mb-8"
         >
-          <div className="flex justify-center mb-6">
-            <div className="w-24 h-24 bg-white/5 border border-white/10 rounded-3xl flex items-center justify-center shadow-[0_0_50px_rgba(0,229,255,0.15)] relative">
-              <ServerCrash className="text-accent-cyan" size={48} />
-              <motion.div 
-                animate={{ opacity: [0.2, 1, 0.2] }} 
-                transition={{ duration: 2, repeat: Infinity }}
-                className="absolute inset-0 bg-accent-cyan/20 blur-xl rounded-3xl -z-10"
-              />
-            </div>
-          </div>
-          
-          <h1 className="text-8xl md:text-9xl font-extrabold text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 mb-4 tracking-tighter">
+          <div className="text-[150px] md:text-[200px] font-black leading-none tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/10 select-none">
             404
+          </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <h1 className="text-3xl md:text-5xl font-bold text-white mb-6">
+            System Route <span className="text-accent-cyan">Not Found</span>
           </h1>
-          
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-6">
-            Connection Lost
-          </h2>
-          
-          <p className="text-gray-400 text-lg mb-10 max-w-md mx-auto">
-            The page you are looking for has been moved, deleted, or never existed in our infrastructure.
+          <p className="text-lg text-gray-400 mb-10 max-w-lg mx-auto font-light leading-relaxed">
+            The infrastructure endpoint you requested does not exist or has been relocated. Please verify the URL or return to the main dashboard.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button 
-              asChild 
-              className="w-full sm:w-auto bg-accent-cyan text-black hover:bg-[#00cce6] font-bold px-8 py-6 rounded-full group uppercase tracking-widest transition-all hover:scale-105"
-            >
-              <Link to="/">
-                <Home className="mr-2" size={18} />
-                Return to Dashboard
-              </Link>
-            </Button>
-            
-            <Button 
-              asChild
-              variant="outline"
-              className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 font-bold px-8 py-6 rounded-full group uppercase tracking-widest transition-all"
-            >
-              <button onClick={() => window.history.back()}>
-                <ArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform" size={18} />
-                Go Back
+            <Link to="/">
+              <button className="flex items-center gap-2 px-8 py-4 bg-accent-cyan text-black font-bold uppercase tracking-widest text-sm rounded-full hover:scale-105 hover:shadow-[0_0_30px_rgba(0,229,255,0.3)] transition-all duration-300">
+                <Home size={18} />
+                Return Home
               </button>
-            </Button>
+            </Link>
+            <button 
+              onClick={() => window.history.back()}
+              className="flex items-center gap-2 px-8 py-4 bg-white/5 border border-white/10 text-white font-bold uppercase tracking-widest text-sm rounded-full hover:bg-white/10 transition-all duration-300"
+            >
+              <ArrowLeft size={18} />
+              Go Back
+            </button>
           </div>
         </motion.div>
       </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Admin3DBackground from '@/components/Admin3DBackground';
 import { motion } from 'framer-motion';
 import { Lock, Mail, AlertCircle, Eye, EyeOff, ShieldCheck, QrCode } from 'lucide-react';
@@ -13,6 +13,7 @@ export default function AdminLogin() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [phase, setPhase] = useState<'login' | 'mfa-setup' | 'mfa-verify'>('login');
   const [mfaCode, setMfaCode] = useState('');
@@ -45,17 +46,40 @@ export default function AdminLogin() {
   const [factorId, setFactorId] = useState('');
 
   useEffect(() => {
-    // Check if already logged in and MFA verified
+    // Check if already logged in and handle MFA state
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data: aal }) => {
+        setAuthUser(session.user);
+        supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(async ({ data: aal }) => {
           if (aal && aal.currentLevel === 'aal2') {
             navigate('/admin/dashboard');
+          } else if (aal && aal.nextLevel === 'aal2' && aal.currentLevel === 'aal1') {
+            setPhase('mfa-verify');
+          } else if (aal && aal.nextLevel === 'aal1') {
+            const { data: enrollData, error: enrollError } = await supabase.auth.mfa.enroll({
+              factorType: 'totp',
+              issuer: 'BrokerCoreAdmin',
+            });
+            if (!enrollError && enrollData) {
+              setFactorId(enrollData.id);
+              const userEmail = session.user?.email || '';
+              const rawUri = enrollData.totp.uri;
+              const secretMatch = rawUri.match(/[?&]secret=([^&]+)/);
+              const secret = secretMatch ? secretMatch[1] : '';
+              const cleanUri = `otpauth://totp/${encodeURIComponent('BrokerCoreAdmin:' + userEmail)}?secret=${secret}&issuer=BrokerCoreAdmin`;
+              setTotpUri(cleanUri);
+              setPhase('mfa-setup');
+            }
           }
         });
+      } else {
+        // Not logged in. Check if they accessed via cheat code.
+        if (!location.state?.secretAccess) {
+          navigate('/', { replace: true });
+        }
       }
     });
-  }, [navigate]);
+  }, [navigate, location]);
 
   const finalizeLogin = async (user: any) => {
     const { data: adminData, error: adminError } = await supabase
@@ -167,11 +191,27 @@ export default function AdminLogin() {
         }
 
         if (aalData.nextLevel === 'aal1') {
-          const { data: enrollData, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp' });
+          const { data: enrollData, error: enrollError } = await supabase.auth.mfa.enroll({
+            factorType: 'totp',
+            issuer: 'BrokerCoreAdmin',
+          });
           if (enrollError) throw enrollError;
           
           setFactorId(enrollData.id);
-          setTotpUri(enrollData.totp.uri);
+
+          // Get the user's email directly from Supabase session (most reliable)
+          const { data: userData } = await supabase.auth.getUser();
+          const userEmail = userData?.user?.email || '';
+
+          // Extract only the TOTP secret from the raw URI
+          const rawUri = enrollData.totp.uri;
+          const secretMatch = rawUri.match(/[?&]secret=([^&]+)/);
+          const secret = secretMatch ? secretMatch[1] : '';
+
+          // Build a perfectly clean URI: BrokerCoreAdmin:email — nothing else
+          const cleanUri = `otpauth://totp/${encodeURIComponent('BrokerCoreAdmin:' + userEmail)}?secret=${secret}&issuer=BrokerCoreAdmin`;
+          setTotpUri(cleanUri);
+
           setPhase('mfa-setup');
           setIsLoading(false);
           return;

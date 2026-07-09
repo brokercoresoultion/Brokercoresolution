@@ -6,8 +6,8 @@ const Plexus = () => {
   const pointsRef = useRef<THREE.Points>(null!);
   const linesRef = useRef<THREE.LineSegments>(null!);
 
-  const particleCount = window.innerWidth < 768 ? 60 : 200;
-  const maxDistance = 3.5;
+  const particleCount = window.innerWidth < 768 ? 40 : 80;
+  const maxDistance = 4.0;
   const boxSize = 20;
 
   const { positions, velocities, colors } = useMemo(() => {
@@ -150,7 +150,7 @@ export default function Admin3DBackground() {
       ) : (
         <Canvas 
           camera={{ position: [0, 0, 8], fov: 45 }} 
-          dpr={[1, 1.5]}
+          dpr={1}
           gl={{ antialias: false, powerPreference: "high-performance" }}
         >
           <ambientLight intensity={1} />

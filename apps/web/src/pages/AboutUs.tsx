@@ -8,8 +8,9 @@ const AboutUs = () => {
   return (
     <div className="min-h-screen text-white pt-32 pb-12 relative overflow-hidden">
       <SEOHead 
-        title="About Us | BrokerCoreSolution"
-        description="Learn about our mission to help businesses streamline operations and accelerate growth with expert technology consulting."
+        title="About Us | BrokerCore: Top Forex Brokerage Consultants"
+        description="Discover why BrokerCore is the #1 choice for Forex brokerage setup, MT5 White Label & liquidity. Partner with industry-leading fintech experts today!"
+        keywords="About BrokerCore, Forex Technology Provider, Fintech Experts, Forex Broker Consultants, BrokerCore Team"
       />
 
       {/* Ambient Lights */}
@@ -71,9 +72,9 @@ const AboutUs = () => {
                 className="glass p-10 rounded-[2rem] border border-white/5"
               >
                 <Building2 className="w-12 h-12 text-accent-cyan mb-6" />
-                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">Streamlined Operations</h3>
+                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">Our Background</h3>
                 <p className="text-gray-400 font-light leading-relaxed">
-                  Our mission is to help businesses scale by implementing robust technology solutions. We cut through the noise to deliver systems that work perfectly from day one.
+                  BrokerCore was founded by a team of financial technology veterans with decades of collective experience in trading systems architecture and brokerage operations. We believe in building long-term partnerships rooted in reliability and continuous innovation.
                 </p>
               </motion.div>
               
@@ -85,9 +86,9 @@ const AboutUs = () => {
                 className="glass p-10 rounded-[2rem] border border-white/5"
               >
                 <Target className="w-12 h-12 text-white mb-6" />
-                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">Accelerated Growth</h3>
+                <h3 className="text-2xl font-bold text-white mb-4 tracking-tight">Global Infrastructure</h3>
                 <p className="text-gray-400 font-light leading-relaxed">
-                  From CRM implementation to liquidity advisory, we provide the entire ecosystem required to build sustainable and highly profitable brokerages.
+                  Our vision is to standardize excellence in financial technology, providing brokers of all sizes access to top-tier institutional infrastructure. We operate globally, ensuring our clients receive localized support backed by world-class technological expertise.
                 </p>
               </motion.div>
             </div>

@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 const offers = [
   {
-    title: 'Lightning-Fast Deployment',
+    title: 'Rapid Infrastructure Deployment',
     description: 'Go to market in weeks, not months. Our turnkey framework allows for rapid configuration, drastically reducing your time-to-market while ensuring institutional-grade stability.',
     icon: Zap,
     color: 'text-accent-cyan',

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet';
+import SEOHead from '@/components/SEOHead';
 import { motion } from 'framer-motion';
 import Stats from '@/components/Stats';
 import SectionAnimator from '@/components/SectionAnimator';
@@ -183,21 +183,22 @@ const Project = () => {
   const {
     projectId
   } = useParams();
-  const project = (projectId && projectData[projectId as keyof typeof projectData]) ? projectData[projectId as keyof typeof projectData] : projectData['fintech-dashboard']; // Fallback
+  const project = projectId && projectId in projectData ? (projectData as any)[projectId] : projectData['fintech-dashboard']; // Fallback
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [projectId]);
 
   return <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={pageTransition} className="text-white">
-      <Helmet>
-        <title>{project.title} - Project Showcase</title>
-        <meta name="description" content={`Details of the ${project.title} project, showcasing our creative solutions and results.`} />
-      </Helmet>
+      <SEOHead 
+        title={`${project.title} | BrokerCore Solution`}
+        description={`Details of the ${project.title} project, showcasing our creative solutions and results.`}
+        keywords={`BrokerCore Project, ${project.category}, Portfolio`}
+      />
 
       <main>
         {/* Top Section */}
-        <SectionAnimator className="">
+        <SectionAnimator>
           <header className="pt-48 pb-16"> {/* Increased padding-top */}
             <div className="container mx-auto px-6 text-center max-w-4xl">
               <h1 className="text-4xl md:text-6xl font-bold uppercase mb-4">{project.title}</h1>
@@ -207,7 +208,7 @@ const Project = () => {
         </SectionAnimator>
         
         {/* Hero Image */}
-        <SectionAnimator className="">
+        <SectionAnimator>
             <div className="container mx-auto px-6 mb-16">
                  <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl shadow-accent-cyan/10">
                     <img className="w-full h-full object-cover" alt={project.images.hero.alt} src="/images/trading_terminal_hero.png" />
@@ -216,16 +217,16 @@ const Project = () => {
         </SectionAnimator>
 
         {/* Gallery - now starts with two images */}
-        <SectionAnimator className="">
+        <SectionAnimator>
             <div className="container mx-auto px-6 mb-16">
                 <div className="grid grid-cols-1 gap-8">
                     {/* Two images */}
                     <div className="grid md:grid-cols-2 gap-8">
                         <div className="aspect-square rounded-2xl overflow-hidden">
-                           <img className="w-full h-full object-cover" loading="lazy" alt={project.images.gallery[1].alt} src="/images/mobile_trading_app.png" />
+                           <img className="w-full h-full object-cover" alt={project.images.gallery[1].alt} src="/images/mobile_trading_app.png" />
                         </div>
                         <div className="aspect-square rounded-2xl overflow-hidden">
-                            <img className="w-full h-full object-cover" loading="lazy" alt={project.images.gallery[2].alt} src="/images/server_infrastructure.png" />
+                            <img className="w-full h-full object-cover" alt={project.images.gallery[2].alt} src="/images/server_infrastructure.png" />
                         </div>
                     </div>
                 </div>
@@ -233,7 +234,7 @@ const Project = () => {
         </SectionAnimator>
         
         {/* Text Section */}
-        <SectionAnimator className="">
+        <SectionAnimator>
             <section className="py-16">
                 <div className="container mx-auto px-6 grid md:grid-cols-2 gap-16 items-start">
                     <div>
@@ -249,10 +250,10 @@ const Project = () => {
         </SectionAnimator>
         
         {/* Second Gallery - changed to single image */}
-        <SectionAnimator className="">
+        <SectionAnimator>
             <div className="container mx-auto px-6 mb-16">
                 <div className="aspect-video rounded-2xl overflow-hidden">
-                    <img className="w-full h-full object-cover" loading="lazy" alt={project.images.gallery2[0].alt} src="/images/corporate_handshake.png" />
+                    <img className="w-full h-full object-cover" alt={project.images.gallery2[0].alt} src="/images/corporate_handshake.png" />
                 </div>
             </div>
         </SectionAnimator>
@@ -261,7 +262,7 @@ const Project = () => {
         <Stats customStats={project.stats} />
 
         {/* Work Together CTA */}
-        <SectionAnimator className="">
+        <SectionAnimator>
             <section className="py-24 text-center">
                 <div className="container mx-auto px-6">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Work Together?</h2>

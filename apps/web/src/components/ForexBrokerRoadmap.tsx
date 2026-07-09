@@ -108,42 +108,37 @@ const RoadmapStep = ({ step, index }) => {
   
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 50, x: isEven ? -50 : 50, scale: 0.9 }}
-      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-10%" }}
-      transition={{ duration: 0.6, type: "spring", bounce: 0.4 }}
-      className={`flex items-center justify-between w-full mb-8 relative ${isEven ? 'flex-row-reverse md:flex-row' : 'flex-row-reverse'}`}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-5%" }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
+      className={`flex items-center w-full mb-10 gap-4 md:gap-0 ${isEven ? 'md:flex-row' : 'md:flex-row-reverse'}`}
     >
-      {/* Spacer for Desktop Layout */}
-      <div className="hidden md:block w-5/12"></div>
-      
+      {/* Content Card — takes full width on mobile, half on desktop */}
+      <div className="flex-1 md:w-5/12 md:flex-none">
+        <div className={`glass-card p-5 rounded-2xl border border-white/10 hover:border-accent-cyan/50 transition-all duration-300 relative group overflow-hidden ${isEven ? 'md:text-right' : 'md:text-left'}`}>
+          <div className={`absolute top-0 w-1 h-full bg-gradient-to-b ${step.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isEven ? 'right-0' : 'left-0'}`}></div>
+          <span className={`text-5xl font-black opacity-10 bg-gradient-to-br ${step.color} bg-clip-text text-transparent absolute -top-4 -right-4`}>{step.id}</span>
+          <h3 className="text-base md:text-xl font-bold text-white relative z-10 mb-2">{step.title}</h3>
+          <p className="text-gray-400 text-sm relative z-10">{step.description}</p>
+        </div>
+      </div>
+
       {/* Center Node */}
-      <div className="absolute left-4 md:left-1/2 transform -translate-x-1/2 flex items-center justify-center">
+      <div className="flex-shrink-0 flex items-center justify-center z-10 md:w-2/12">
         <motion.div 
           whileHover={{ scale: 1.2, rotate: 360 }}
           transition={{ duration: 0.5 }}
-          className={`w-12 h-12 md:w-16 md:h-16 rounded-full bg-gradient-to-br ${step.color} p-[2px] shadow-[0_0_15px_rgba(0,255,255,0.3)] z-10`}
+          className={`w-12 h-12 rounded-full bg-gradient-to-br ${step.color} p-[2px] shadow-[0_0_15px_rgba(0,255,255,0.3)]`}
         >
           <div className="w-full h-full bg-[#0B0B0B] rounded-full flex items-center justify-center">
-            <step.icon className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <step.icon className="w-5 h-5 text-white" />
           </div>
         </motion.div>
       </div>
-      
-      {/* Content Card */}
-      <div className="w-full md:w-5/12 pl-16 md:pl-0 z-10">
-        <div className={`glass-card p-6 rounded-2xl border border-white/10 hover:border-accent-cyan/50 transition-all duration-300 relative group overflow-hidden ${isEven ? 'md:text-right' : 'md:text-left'}`}>
-          <div className={`absolute top-0 w-1 h-full bg-gradient-to-b ${step.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${isEven ? 'md:right-0 left-0 md:left-auto' : 'left-0'}`}></div>
-          
-          <div className={`flex items-center gap-3 mb-3 ${isEven ? 'md:justify-end' : 'justify-start'}`}>
-            <span className={`text-3xl md:text-5xl font-black opacity-10 bg-gradient-to-br ${step.color} bg-clip-text text-transparent absolute -top-2 ${isEven ? 'md:-left-2' : '-right-2'} md:-top-4 md:-right-4`}>
-              {step.id}
-            </span>
-            <h3 className="text-xl md:text-2xl font-bold text-white relative z-10">{step.title}</h3>
-          </div>
-          <p className="text-gray-400 text-sm md:text-base relative z-10">{step.description}</p>
-        </div>
-      </div>
+
+      {/* Spacer — only visible on desktop */}
+      <div className="hidden md:block md:w-5/12 md:flex-none"></div>
     </motion.div>
   );
 };
@@ -193,13 +188,13 @@ const ForexBrokerRoadmap = () => {
 
         {/* Timeline Container */}
         <div className="relative pt-10">
-          {/* Static Background Line */}
-          <div className="absolute left-10 md:left-1/2 transform -translate-x-1/2 h-full w-[2px] bg-white/5 z-0"></div>
+          {/* Static Background Line - mobile: aligns with icon center, desktop: center */}
+          <div className="absolute left-6 md:left-1/2 transform md:-translate-x-1/2 h-full w-[2px] bg-white/5 z-0"></div>
           
           {/* Animated Growing Line */}
           <motion.div 
             style={{ scaleY, transformOrigin: "top" }}
-            className="absolute left-10 md:left-1/2 transform -translate-x-1/2 h-full w-[4px] rounded-full bg-gradient-to-b from-accent-cyan to-blue-500 z-0 shadow-[0_0_15px_rgba(0,255,255,0.5)]"
+            className="absolute left-6 md:left-1/2 transform md:-translate-x-1/2 h-full w-[4px] rounded-full bg-gradient-to-b from-accent-cyan to-blue-500 z-0 shadow-[0_0_15px_rgba(0,255,255,0.5)]"
           ></motion.div>
           
           {/* Steps */}

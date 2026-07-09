@@ -1,12 +1,14 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import SEOHead from '@/components/SEOHead';
 
 const TermsAndConditions = () => {
   return (
     <div className="pt-32 pb-24 min-h-screen">
-      <Helmet>
-        <title>Terms & Conditions | BrokerCoreSolution</title>
-      </Helmet>
+      <SEOHead 
+        title="Terms & Conditions | BrokerCore Solution"
+        description="Read the Terms & Conditions for BrokerCore Solution regarding our Forex turnkey and software services."
+        keywords="BrokerCore Policies, Forex Software Legal, Terms and Conditions"
+      />
       <div className="container mx-auto px-6 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold mb-12 text-white uppercase tracking-widest border-b border-white/10 pb-8">
           Terms & <span className="text-accent-cyan">Conditions</span>
@@ -73,9 +75,9 @@ const TermsAndConditions = () => {
 
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">7. Contact Information</h2>
-            <p>
-              If you have any questions about these Terms, please contact us at: <br/>
-              <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=info@brokercoresolution.com" target="_blank" rel="noopener noreferrer" className="text-accent-cyan hover:underline">info@brokercoresolution.com</a>
+            <p className="text-gray-300">
+              If you have any questions or concerns about these Terms, please contact us at: <br/>
+              <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=brokercoresolution@gmail.com" target="_blank" rel="noopener noreferrer" className="text-accent-cyan hover:underline">brokercoresolution@gmail.com</a>
             </p>
           </section>
         </div>

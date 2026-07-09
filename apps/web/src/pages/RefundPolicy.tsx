@@ -1,12 +1,14 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import SEOHead from '@/components/SEOHead';
 
 const RefundPolicy = () => {
   return (
     <div className="pt-32 pb-24 min-h-screen">
-      <Helmet>
-        <title>Refund & Cancellation Policy | BrokerCoreSolution</title>
-      </Helmet>
+      <SEOHead 
+        title="Refund Policy | BrokerCore Solution"
+        description="Read the Refund Policy for BrokerCore Solution regarding our Forex turnkey and software services."
+        keywords="BrokerCore Policies, Forex Software Legal, Refund Policy"
+      />
       <div className="container mx-auto px-6 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold mb-12 text-white uppercase tracking-widest border-b border-white/10 pb-8">
           Refund & Cancellation <span className="text-accent-cyan">Policy</span>
@@ -51,7 +53,7 @@ const RefundPolicy = () => {
           <section>
             <h2 className="text-2xl font-bold text-white mb-4">5. Contact Us</h2>
             <p>
-              If you wish to request a cancellation or have questions about a potential refund, please contact your dedicated account manager or email us directly at <strong>enquiry@brokercoresolution.com</strong>.
+              If you wish to request a cancellation or have questions about a potential refund, please contact your dedicated account manager or email us directly at <strong>support@brokercoresolution.com</strong>.
             </p>
           </section>
         </div>

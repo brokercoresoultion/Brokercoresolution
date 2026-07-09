@@ -1,42 +1,62 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { ArrowLeft, ArrowRight, Quote } from 'lucide-react';
-import OptimizedImage from './OptimizedImage';
+import { ArrowLeft, ArrowRight, Quote, Plus, X } from 'lucide-react';
+import { toast } from "@/components/ui/use-toast";
 
-const testimonials = [
+const initialTestimonials = [
   {
     id: 1,
     name: 'Tariq Al-Fayed',
-    role: 'Institutional Broker CEO, Dubai',
     content: 'Broker Core Solution lives up to its name. They provided the foundational core our brokerage needed—from rapid corporate structuring to a flawless MT5 turnkey deployment. The operational stability has been exceptional from day one.',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   },
   {
     id: 2,
     name: 'Elena Rostova',
-    role: 'Fintech Founder, Cyprus',
     content: 'Building an institutional framework from scratch was daunting until we partnered with Broker Core Solution. Their CySEC-ready infrastructure became the core of our operations, cutting our time-to-market by 70%. A truly indispensable B2B partner.',
-    avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   },
   {
     id: 3,
     name: 'Wei Chen',
-    role: 'Brokerage Operations Manager, Singapore',
     content: 'The backend ecosystem provided by Broker Core Solution is phenomenal. They delivered a true \'core solution\' where our CRM, liquidity pools, and payment gateways operate in perfect sync, completely automating our client workflows.',
-    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
   },
   {
     id: 4,
     name: 'Marcus Thorne',
-    role: 'Prop Firm Founder, London',
-    content: 'As a proprietary trading firm, a robust core infrastructure is non-negotiable. Broker Core Solution’s Tier-1 liquidity bridges and ultra-low latency VPS have handled our high-frequency EA trading volume flawlessly without a single bottleneck.',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    content: 'As a proprietary trading firm, a robust core infrastructure is non-negotiable. Broker Core Solution’s Institutional liquidity bridges and optimized latency VPS have handled our high-frequency EA trading volume flawlessly without a single bottleneck.',
   },
+  {
+    id: 5,
+    name: 'Hiroshi Tanaka',
+    content: 'We needed a highly reliable bridging solution for our APAC clients. Broker Core Solution delivered an incredibly stable environment with execution speeds that easily surpassed our expectations.',
+  },
+  {
+    id: 6,
+    name: 'Johan Müller',
+    content: 'The compliance and regulatory tools baked into the CRM are world-class. It saves us countless hours in KYC processing and keeps our operations perfectly aligned with European standards.',
+  },
+  {
+    id: 7,
+    name: 'Sarah Jenkins',
+    content: 'From zero to fully operational in 3 weeks! The white-label MT5 solution was customized perfectly to our brand. Their 24/7 technical support team is always just a message away.',
+  },
+  {
+    id: 8,
+    name: 'Nkosi Buthelezi',
+    content: 'Integrating our educational platform with their trading infrastructure was seamless. Our students now practice in a live environment that mirrors institutional trading conditions exactly.',
+  },
+  {
+    id: 9,
+    name: 'Michael O\'Connor',
+    content: 'The multi-venue liquidity aggregation engine is phenomenal. It dynamically routes our large block orders to minimize slippage. Broker Core Solution is an invaluable technology partner.',
+  }
 ];
 
 const Testimonials = () => {
-  const scrollContainerRef = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [reviews, setReviews] = useState(initialTestimonials);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState({ name: '', content: '' });
 
   useEffect(() => {
     const updateItemsPerPage = () => {
@@ -52,20 +72,20 @@ const Testimonials = () => {
   }, []);
 
   const canScrollLeft = currentIndex > 0;
-  const canScrollRight = currentIndex < testimonials.length - itemsPerPage;
+  const canScrollRight = currentIndex < reviews.length - itemsPerPage;
 
-  const scroll = (direction) => {
+  const scroll = (direction: 'left' | 'right') => {
     let newIndex = currentIndex;
     if (direction === 'left' && canScrollLeft) {
       newIndex = Math.max(0, currentIndex - 1);
     } else if (direction === 'right' && canScrollRight) {
-      newIndex = Math.min(testimonials.length - itemsPerPage, currentIndex + 1);
+      newIndex = Math.min(reviews.length - itemsPerPage, currentIndex + 1);
     }
 
     if (newIndex !== currentIndex) {
       setCurrentIndex(newIndex);
       if (scrollContainerRef.current) {
-        const card = scrollContainerRef.current.children[newIndex];
+        const card = scrollContainerRef.current.children[newIndex] as HTMLElement;
         if(card) {
           scrollContainerRef.current.scrollTo({
             left: card.offsetLeft,
@@ -76,18 +96,49 @@ const Testimonials = () => {
     }
   };
 
+  const handleReviewSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.content) return;
+    
+    const newReview = {
+      id: Date.now(),
+      name: formData.name,
+      content: formData.content,
+    };
+
+    setReviews([newReview, ...reviews]);
+    setIsModalOpen(false);
+    setFormData({ name: '', content: '' });
+    setCurrentIndex(0);
+    
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    }
+
+    toast({
+      title: "Review Submitted!",
+      description: "Thank you for your feedback. It has been added successfully.",
+    });
+  };
+
   return (
     <section id="testimonials" className="py-24 transition-colors duration-500 relative overflow-hidden">
-      {/* Background Glows */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-white/5 rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-accent-cyan/5 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl flex flex-col items-start gap-4">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight">
-              Trusted by <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-white italic font-light">Industry Leaders</span>
+              Client <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-white italic font-light">Experiences</span>
             </h2>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent-cyan/10 border border-accent-cyan/20 hover:border-accent-cyan/50 hover:bg-accent-cyan/20 text-accent-cyan dark:text-white rounded-full transition-all duration-300 font-semibold text-sm"
+            >
+              <Plus size={16} />
+              Add Your Review
+            </button>
           </div>
           <div className="hidden md:flex gap-4">
             <button
@@ -113,7 +164,7 @@ const Testimonials = () => {
           ref={scrollContainerRef}
           className="flex flex-nowrap gap-6 pb-8 overflow-x-auto snap-x snap-mandatory scrollbar-hide"
         >
-          {testimonials.map((testimonial) => (
+          {reviews.map((testimonial) => (
             <div
               key={testimonial.id}
               className="flex-shrink-0 w-[calc(100%-10px)] md:w-[calc(50%-12px)] snap-start"
@@ -130,39 +181,66 @@ const Testimonials = () => {
                 <div className="flex items-center mt-auto">
                   <div className="relative">
                     <div className="absolute inset-0 rounded-full bg-accent-cyan/20 blur-md group-hover:bg-accent-cyan/40 transition-colors duration-500"></div>
-                    <OptimizedImage width={64} height={64} className="w-16 h-16 rounded-full mr-5 object-cover border-2 border-black/10 dark:border-white/10 relative z-10" alt={testimonial.name} src={testimonial.avatar} />
+                    <div className="w-16 h-16 rounded-full mr-5 bg-accent-cyan/10 border-2 border-accent-cyan/30 relative z-10 flex items-center justify-center text-accent-cyan font-bold text-2xl">
+                      {testimonial.name.charAt(0).toUpperCase()}
+                    </div>
                   </div>
                   <div>
                     <p className="font-bold text-gray-900 dark:text-white tracking-wide text-lg">{testimonial.name}</p>
-                    <p className="text-sm text-accent-cyan font-medium">{testimonial.role}</p>
                   </div>
                 </div>
               </div>
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="mt-8 flex justify-end md:hidden">
-          <div className="flex gap-4">
-            <button
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 text-gray-900 dark:text-white flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              aria-label="Scroll left"
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#0f172a] border border-white/10 p-8 rounded-3xl w-full max-w-lg relative shadow-2xl">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-6 right-6 text-gray-400 hover:text-white transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <X size={24} />
             </button>
-            <button
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className="w-12 h-12 rounded-full bg-black/5 dark:bg-white/5 backdrop-blur-md border border-black/10 dark:border-white/10 text-gray-900 dark:text-white flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              aria-label="Scroll right"
-            >
-              <ArrowRight className="w-5 h-5" />
-            </button>
+            
+            <h3 className="text-2xl font-bold text-white mb-6">Share Your Experience</h3>
+            
+            <form onSubmit={handleReviewSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Full Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-cyan"
+                  placeholder="John Doe"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Your Review</label>
+                <textarea 
+                  required
+                  rows={4}
+                  value={formData.content}
+                  onChange={(e) => setFormData({...formData, content: e.target.value})}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-cyan resize-none"
+                  placeholder="How did BrokerCore help your business?"
+                />
+              </div>
+              <button 
+                type="submit"
+                className="w-full bg-accent-cyan hover:bg-accent-cyan/90 text-black font-bold rounded-xl px-4 py-3 transition-colors mt-4"
+              >
+                Submit Review
+              </button>
+            </form>
           </div>
         </div>
-      </div>
+      )}
+
     </section>
   );
 };

@@ -17,6 +17,7 @@ export default function WhatsAppButton() {
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       title="Chat with us on WhatsApp"
+      aria-label="Chat with us on WhatsApp"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

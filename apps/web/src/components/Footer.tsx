@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Instagram, Facebook, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import OptimizedImage from './OptimizedImage';
 import { apiClient } from '@/lib/apiClient';
 import { supabase } from '@/lib/supabase';
 import PhoneActionMenu from './PhoneActionMenu';
 
-const XIcon = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+const XIcon = ({ size = 20, width, height }: { size?: number | string, width?: number | string, height?: number | string }) => (
+  <svg width={width || size} height={height || size} viewBox="0 0 24 24" fill="currentColor">
     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+const WhatsAppIcon = ({ size = 20, width, height }: { size?: number | string, width?: number | string, height?: number | string }) => (
+  <svg width={width || size} height={height || size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
   </svg>
 );
 
@@ -18,6 +24,7 @@ const SOCIAL_LINKS = {
   twitter: 'https://x.com/brokercoresolution',
   instagram: 'https://www.instagram.com/brokercoresolution_official',
   facebook: 'https://facebook.com/brokercoresolution',
+  whatsapp: 'https://wa.me/97155752279',
 };
 
 const Footer = () => {
@@ -63,28 +70,23 @@ const Footer = () => {
 
     const onSubmit = async (data: any) => {
         try {
-            // Check if already subscribed
-            const { data: existing, error: checkError } = await supabase
-                .from('subscribers')
-                .select('email')
-                .eq('email', data.email)
-                .single();
-
-            if (existing) {
-                toast({
-                    title: "Already Subscribed",
-                    description: "This email is already on our list!",
-                });
-                return;
-            }
-
             const newSubscriber = {
-                email: data.email,
+                email: data.email
             };
 
             const { error: insertError } = await supabase.from('subscribers').insert(newSubscriber);
             
-            if (insertError) throw insertError;
+            if (insertError) {
+                // Postgres Unique Violation code is '23505'
+                if (insertError.code === '23505' || insertError.message.includes('duplicate')) {
+                    toast({
+                        title: "Already Subscribed",
+                        description: "This email is already on our list!",
+                    });
+                    return;
+                }
+                throw insertError;
+            }
 
             toast({
                 title: "Welcome Aboard! 🎉",
@@ -92,7 +94,7 @@ const Footer = () => {
             });
             reset();
         } catch (error) {
-            console.error("Subscription error details:", error);
+            console.error("Subscription Error:", error);
             toast({
                 title: "Error",
                 description: "Failed to subscribe. Please try again.",
@@ -195,6 +197,8 @@ const Footer = () => {
                                 <div className="relative w-full">
                                     <input 
                                         type="email" 
+                                        aria-label="Email address"
+                                        autoComplete="email"
                                         placeholder="Enter your email address" 
                                         {...register("email", { 
                                             required: "Email is required",
@@ -227,7 +231,7 @@ const Footer = () => {
                             <p className="text-xs font-bold text-accent-cyan tracking-[0.2em] mt-2 uppercase">IT Solutions Est</p>
                         </div>
                         <p className="text-gray-600 dark:text-gray-400 mb-8 font-light leading-relaxed max-w-sm">
-                            Your trusted institutional partner in navigating the dynamic landscape of the global Forex market with Tier-1 infrastructure.
+                            Your trusted institutional partner in navigating the dynamic landscape of the global Forex market with Institutional infrastructure.
                         </p>
                         
                         <div className="space-y-4">
@@ -235,7 +239,7 @@ const Footer = () => {
                                 <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center group-hover:border-accent-cyan transition-colors">
                                     <Mail size={16} className="group-hover:text-accent-cyan transition-colors" />
                                 </div>
-                                <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=enquiry@brokercoresolution.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 dark:hover:text-white transition-colors">enquiry@brokercoresolution.com</a>
+                                <a href="https://mail.google.com/mail/u/0/?view=cm&fs=1&to=support@brokercoresolution.com" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 dark:hover:text-white transition-colors">support@brokercoresolution.com</a>
                             </div>
                             <div className="flex items-center gap-4 text-gray-600 dark:text-gray-400 font-light group cursor-pointer">
                                 <div className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center group-hover:border-accent-cyan transition-colors">
@@ -340,18 +344,27 @@ const Footer = () => {
 
                 {/* Forex Risk Disclaimer */}
                 <div className="mb-8 pt-8 border-t border-black/10 dark:border-white/10">
-                    <p className="text-xs leading-relaxed text-gray-500 dark:text-gray-400 font-light text-justify">
-                        <strong className="text-gray-900 dark:text-gray-300 font-semibold">High-Risk Investment Warning:</strong> Trading Foreign Exchange (Forex) and Contracts for Differences (CFDs) is highly speculative, carries a high level of risk, and may not be suitable for all investors. You may sustain a loss of some or all of your invested capital, therefore, you should not speculate with capital that you cannot afford to lose. You should be aware of all the risks associated with trading on margin. BrokerCore Solution provides institutional technology and liquidity solutions. We do not offer financial advice, portfolio management, or act as an executing broker for retail clients. Please ensure you fully understand the risks involved and seek independent advice if necessary.
+                    <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300 font-medium text-justify">
+                        <strong className="text-black dark:text-white font-bold">High-Risk Investment Warning:</strong> Trading Foreign Exchange (Forex) and Contracts for Differences (CFDs) is highly speculative, carries a high level of risk, and may not be suitable for all investors. You may sustain a loss of some or all of your invested capital, therefore, you should not speculate with capital that you cannot afford to lose. You should be aware of all the risks associated with trading on margin. BrokerCore Solution is strictly a B2B technology and infrastructure provider, not a broker. We do not hold client funds, offer financial advice, portfolio management, or act as an executing broker for retail clients. Please ensure you fully understand the risks involved and seek independent advice if necessary.
                     </p>
                 </div>
 
                 {/* Bottom Bar */}
                 <div className="pt-8 border-t border-black/10 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-sm text-gray-500 font-light">
-                        &copy; {new Date().getFullYear()} BROKERCORESOLUTION IT Solutions Est. All rights reserved.
+                    <p className="text-sm text-gray-300 font-light flex items-center flex-wrap gap-2">
+                        <span>&copy; {new Date().getFullYear()} BrokerCore IT Solutions Est. All rights reserved.</span>
                     </p>
                     
                     <div className="flex gap-4">
+                        <a 
+                            href={SOCIAL_LINKS.whatsapp}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Contact us on WhatsApp"
+                            className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/20 transition-all duration-300"
+                        >
+                            <WhatsAppIcon width={16} height={16} />
+                        </a>
                         <a 
                             href={SOCIAL_LINKS.twitter}
                             target="_blank"
@@ -359,7 +372,7 @@ const Footer = () => {
                             aria-label="Follow us on X (Twitter)"
                             className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/20 transition-all duration-300"
                         >
-                            <XIcon size={16} />
+                            <XIcon width={16} height={16} />
                         </a>
                         <a 
                             href={SOCIAL_LINKS.instagram}
@@ -368,7 +381,7 @@ const Footer = () => {
                             aria-label="Follow us on Instagram"
                             className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/20 transition-all duration-300"
                         >
-                            <Instagram size={16} />
+                            <Instagram width={16} height={16} />
                         </a>
                         <a 
                             href={SOCIAL_LINKS.facebook}
@@ -377,7 +390,7 @@ const Footer = () => {
                             aria-label="Follow us on Facebook"
                             className="w-10 h-10 rounded-full bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/10 dark:hover:bg-white/10 hover:border-black/20 dark:hover:border-white/20 transition-all duration-300"
                         >
-                            <Facebook size={16} />
+                            <Facebook width={16} height={16} />
                         </a>
                     </div>
                 </div>
@@ -388,15 +401,15 @@ const Footer = () => {
                 <h2>HTML Site Map</h2>
                 <nav aria-label="Full Site Map">
                     <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/about-us">About Us</a></li>
-                        <li><a href="/calculator">Brokerage Calculator</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                        <li><a href="/blog">Our Blog</a></li>
-                        <li><a href="/privacy-policy">Privacy Policy</a></li>
-                        <li><a href="/terms-and-conditions">Terms & Conditions</a></li>
-                        <li><a href="/refund-policy">Refund Policy</a></li>
-                        <li><a href="/aml-policy">AML Policy</a></li>
+                        <li><a href="/" tabIndex={-1}>Home</a></li>
+                        <li><a href="/about-us" tabIndex={-1}>About Us</a></li>
+                        <li><a href="/calculator" tabIndex={-1}>Brokerage Calculator</a></li>
+                        <li><a href="/contact" tabIndex={-1}>Contact</a></li>
+                        <li><a href="/blog" tabIndex={-1}>Our Blog</a></li>
+                        <li><a href="/privacy-policy" tabIndex={-1}>Privacy Policy</a></li>
+                        <li><a href="/terms-and-conditions" tabIndex={-1}>Terms & Conditions</a></li>
+                        <li><a href="/refund-policy" tabIndex={-1}>Refund Policy</a></li>
+                        <li><a href="/aml-policy" tabIndex={-1}>AML Policy</a></li>
                     </ul>
                 </nav>
             </div>

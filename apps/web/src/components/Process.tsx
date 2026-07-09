@@ -6,7 +6,7 @@ const steps = [
   { id: '02', title: 'Company Incorporation', description: 'Complete legal registration and structuring of your business entity.' },
   { id: '03', title: 'Licensing & Compliance', description: 'Obtaining necessary permits and ensuring strict regulatory adherence.' },
   { id: '04', title: 'Platform Selection', description: 'Deploying robust, world-class trading platforms and infrastructure.' },
-  { id: '05', title: 'Liquidity Setup', description: 'Partnering with tier-1 liquidity providers for deep, reliable market access.' },
+  { id: '05', title: 'Liquidity Setup', description: 'Partnering with institutional liquidity providers for deep, reliable market access.' },
   { id: '06', title: 'CRM Integration', description: 'Setting up advanced back-office systems for client management, KYC, and AML.' },
   { id: '07', title: 'Payment Systems', description: 'Configuring secure, global deposit and withdrawal methods for seamless transactions.' },
   { id: '08', title: 'Risk Management', description: 'Installing sophisticated RMS tools to monitor and mitigate operational risks.' },

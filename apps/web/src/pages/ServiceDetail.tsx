@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Helmet } from 'react-helmet';
+import SEOHead from '@/components/SEOHead';
 import {
   ArrowLeft, ArrowRight, CheckCircle2, ChevronRight,
   Zap, BarChart3, Shield, Globe, TrendingUp,
@@ -45,7 +45,7 @@ const ACCENT = {
 };
 
 // ── Sub-components ──────────────────────────────────────────────────────────
-const OverviewParagraph = ({ text, index }) => (
+const OverviewParagraph = ({ text, index }: { text: string, index: number }) => (
   <motion.p
     custom={index}
     variants={fadeUp}
@@ -58,7 +58,7 @@ const OverviewParagraph = ({ text, index }) => (
   </motion.p>
 );
 
-const SpecItem = ({ text, index, accent }) => (
+const SpecItem = ({ text, index, accent }: { text: string, index: number, accent: keyof typeof ACCENT }) => (
   <motion.li
     custom={index}
     variants={fadeUp}
@@ -77,7 +77,7 @@ const ServiceDetail = () => {
   const { serviceId } = useParams();
   const navigate = useNavigate();
 
-  const service = SERVICES_DATA[serviceId];
+  const service = serviceId ? SERVICES_DATA[serviceId as keyof typeof SERVICES_DATA] : null;
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
@@ -100,11 +100,11 @@ const ServiceDetail = () => {
     );
   }
 
-  const a = ACCENT[service.accent] || ACCENT.cyan;
+  const a = ACCENT[service.accent as keyof typeof ACCENT] || ACCENT.cyan;
 
   // Prev / Next services for navigation
   const allIds = SERVICES_LIST.map((s) => s.id);
-  const currentIdx = allIds.indexOf(serviceId);
+  const currentIdx = serviceId ? allIds.indexOf(serviceId) : -1;
   const prevService = currentIdx > 0 ? SERVICES_LIST[currentIdx - 1] : null;
   const nextService = currentIdx < allIds.length - 1 ? SERVICES_LIST[currentIdx + 1] : null;
 
@@ -116,13 +116,11 @@ const ServiceDetail = () => {
       transition={{ duration: 0.4 }}
       className="min-h-screen text-white overflow-x-hidden"
     >
-      <Helmet>
-        <title>{service.title} — BROKERCORESOLUTION Institutional Solutions</title>
-        <meta
-          name="description"
-          content={`${service.subtitle} — ${service.overview[0].slice(0, 155)}...`}
-        />
-      </Helmet>
+      <SEOHead 
+        title={`${service.title} | BrokerCore Solution`}
+        description={`${service.subtitle} — ${service.overview[0].slice(0, 155)}...`}
+        keywords={`BrokerCore ${service.title}, Forex Broker Service, Fintech Solutions`}
+      />
 
       {/* ── HERO ────────────────────────────────────────────────────────────── */}
       <section className="relative pt-32 pb-24 overflow-hidden">
@@ -213,7 +211,7 @@ const ServiceDetail = () => {
             <div className="grid md:grid-cols-[1fr_400px] gap-12 items-start">
               {/* Paragraphs */}
               <div className="space-y-6">
-                {service.overview.map((para, i) => (
+                {service.overview.map((para: string, i: number) => (
                   <OverviewParagraph key={i} text={para} index={i} />
                 ))}
               </div>
@@ -287,8 +285,8 @@ const ServiceDetail = () => {
             </motion.h2>
 
             <ul className="grid md:grid-cols-2 gap-3">
-              {service.specs.map((spec, i) => (
-                <SpecItem key={i} text={spec} index={i} accent={service.accent} />
+              {service.specs.map((spec: string, i: number) => (
+                <SpecItem key={i} text={spec} index={i} accent={service.accent as keyof typeof ACCENT} />
               ))}
             </ul>
           </div>

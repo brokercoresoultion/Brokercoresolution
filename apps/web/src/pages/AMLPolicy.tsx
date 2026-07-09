@@ -1,12 +1,14 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import SEOHead from '@/components/SEOHead';
 
 const AMLPolicy = () => {
   return (
     <div className="pt-32 pb-24 min-h-screen">
-      <Helmet>
-        <title>AML & Compliance Policy | BrokerCoreSolution</title>
-      </Helmet>
+      <SEOHead 
+        title="AML Policy | BrokerCore Solution"
+        description="Read the AML Policy for BrokerCore Solution regarding our Forex turnkey and software services."
+        keywords="BrokerCore Policies, Forex Software Legal, AML Policy"
+      />
       <div className="container mx-auto px-6 max-w-4xl">
         <h1 className="text-4xl md:text-5xl font-bold mb-12 text-white uppercase tracking-widest border-b border-white/10 pb-8">
           AML & Compliance <span className="text-accent-cyan">Policy</span>

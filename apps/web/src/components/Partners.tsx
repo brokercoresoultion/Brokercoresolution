@@ -191,7 +191,7 @@ const Partners = () => {
             </span>
           </h2>
           <p className="text-gray-500 text-base max-w-xl mx-auto leading-relaxed">
-            Seamlessly connected with tier-1 technology providers,<br className="hidden md:block" />
+            Seamlessly connected with institutional technology providers,<br className="hidden md:block" />
             liquidity sources, and compliance infrastructure.
           </p>
         </motion.div>

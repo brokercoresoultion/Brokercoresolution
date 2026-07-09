@@ -1,18 +1,21 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-
 import { VitePWA } from 'vite-plugin-pwa';
+import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 
 export default defineConfig({
   plugins: [
     react(),
+    ViteImageOptimizer({
+      png: { quality: 80 },
+      jpeg: { quality: 80 },
+      webp: { quality: 80 },
+      avif: { quality: 70 },
+    }),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
-      workbox: {
-        maximumFileSizeToCacheInBytes: 5000000,
-      },
+      includeAssets: ['logo.png'],
       manifest: {
         name: 'BrokerCore Solution',
         short_name: 'BrokerCore',
@@ -22,14 +25,16 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'pwa-192x192.png',
+            src: 'logo.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           },
           {
-            src: 'pwa-512x512.png',
+            src: 'logo.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any maskable'
           }
         ]
       }
@@ -40,23 +45,24 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    host: '::',
+    port: 3000,
+    hmr: true
+  },
   build: {
-    chunkSizeWarningLimit: 3000,
     target: 'esnext',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        drop_console: true,
-        drop_debugger: true,
-      },
-    },
     rollupOptions: {
       output: {
         manualChunks: {
-          framer: ['framer-motion'],
-          gsap: ['gsap']
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['lucide-react', 'framer-motion'],
+          three: ['three', '@react-three/fiber', '@react-three/drei']
         }
       }
     }
+  },
+  esbuild: {
+    drop: ['console', 'debugger'],
   },
 });

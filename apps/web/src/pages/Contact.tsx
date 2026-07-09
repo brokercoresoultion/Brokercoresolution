@@ -1,11 +1,12 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
+import SEOHead from '../components/SEOHead';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from "@/components/ui/use-toast";
 import { Loader2, Mail, Phone, MapPin, ArrowRight } from 'lucide-react';
 import { apiClient } from '@/lib/apiClient';
 import { supabase } from '@/lib/supabase';
+import { sendEmailNotification } from '@/lib/sendEmailNotification';
 import PhoneActionMenu from '../components/PhoneActionMenu';
 
 const pageVariants = {
@@ -17,11 +18,11 @@ const pageVariants = {
 const ContactInfoCard = ({ icon: Icon, title, lines, delay }: { icon: any, title: string, lines: string[], delay: number }) => {
   const innerContent = (
     <>
-      <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-accent-cyan/10 group-hover:border-accent-cyan/30 transition-all duration-300">
-        <Icon size={20} className="text-gray-400 group-hover:text-accent-cyan transition-colors" />
+      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-accent-cyan/10 group-hover:border-accent-cyan/30 transition-all duration-300">
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-accent-cyan transition-colors" />
       </div>
       <div className="flex-1 min-w-0">
-        <h3 className="uppercase text-sm font-bold text-white mb-2 tracking-widest">{title}</h3>
+        <h3 className="uppercase text-xs sm:text-sm font-bold text-white mb-1 sm:mb-2 tracking-widest">{title}</h3>
         <div className="space-y-1">
           {lines.map((line, index) => {
             if (line.includes('@')) {
@@ -31,7 +32,7 @@ const ContactInfoCard = ({ icon: Icon, title, lines, delay }: { icon: any, title
                   href={`https://mail.google.com/mail/u/0/?view=cm&fs=1&to=${line}`} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="block text-gray-400 hover:text-accent-cyan transition-colors font-light text-sm break-all"
+                  className="block text-gray-400 hover:text-accent-cyan transition-colors font-light text-[11px] sm:text-sm whitespace-nowrap"
                 >
                   {line}
                 </a>
@@ -50,7 +51,7 @@ const ContactInfoCard = ({ icon: Icon, title, lines, delay }: { icon: any, title
                 </a>
               );
             }
-            return <p key={index} className="text-gray-400 font-light text-sm">{line}</p>;
+            return <p key={index} className="text-gray-400 font-light text-[11px] sm:text-sm">{line}</p>;
           })}
         </div>
       </div>
@@ -62,14 +63,14 @@ const ContactInfoCard = ({ icon: Icon, title, lines, delay }: { icon: any, title
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay }}
-      className="glass p-6 rounded-2xl border border-white/5 hover:border-accent-cyan/30 transition-colors group"
+      className="glass p-4 sm:p-6 rounded-2xl border border-white/5 hover:border-accent-cyan/30 transition-colors group"
     >
       {title === "Call Us" ? (
         <PhoneActionMenu phoneNumber={lines[0]} className="flex gap-4 items-start w-full text-left">
           {innerContent}
         </PhoneActionMenu>
       ) : (
-        <div className="flex gap-4 items-start w-full text-left">
+        <div className="flex gap-3 sm:gap-4 items-start w-full text-left overflow-hidden">
           {innerContent}
         </div>
       )}
@@ -98,6 +99,9 @@ const Contact = () => {
         throw error;
       }
 
+      // Trigger Email Notification
+      await sendEmailNotification(newLead);
+
       toast({
         title: "Message Sent! 🚀",
         description: "We've received your request and will be in touch shortly.",
@@ -115,15 +119,17 @@ const Contact = () => {
 
   return (
     <motion.div initial="initial" animate="in" exit="out" variants={pageVariants} transition={{ type: 'tween', ease: 'anticipate', duration: 0.5 }} className="min-h-screen pt-32 pb-24 relative overflow-hidden">
-      <Helmet>
-        <title>Contact Sales | BrokerCoreSolution</title>
-      </Helmet>
+      <SEOHead 
+        title="Contact Us | Get Your Forex Brokerage Setup in Days - BrokerCore"
+        description="Ready to launch your Forex brokerage? Contact BrokerCore experts now for MT5 White Label, CRM, and licensing setup. Fast, reliable, and secure!"
+        keywords="Contact BrokerCore, Forex Broker Support, Request Forex Demo, Forex Business Consultation"
+      />
 
       {/* Bae                                                                                                             ckground Ambience */}
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-accent-cyan/[0.04] rounded-full blur-[150px] pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-white/[0.04] rounded-full blur-[150px] pointer-events-none" />
 
-      <div className="container mx-auto px-6 relative z-10 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 relative z-10 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
 
           {/* Left Column */}
@@ -140,12 +146,10 @@ const Contact = () => {
               Partner with the industry leader in brokerage technology. Drop us a message and our institutional sales team will be in touch shortly.
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-              <ContactInfoCard icon={Mail} title="Email Us" lines={["enquiry@brokercoresolution.com", "sales@brokercoresolution.com"]} delay={0.4} />
+            <div className="flex flex-col gap-4 mb-12">
+              <ContactInfoCard icon={Mail} title="Email Us" lines={["support@brokercoresolution.com"]} delay={0.4} />
               <ContactInfoCard icon={Phone} title="Call Us" lines={["+971 55 752 279", "Mon-Fri, 9am-6pm (GST)"]} delay={0.5} />
-              <div className="sm:col-span-2">
-                <ContactInfoCard icon={MapPin} title="Headquarters" lines={["Office 2807, Churchill Executive Tower", "Business Bay, Dubai, United Arab Emirates"]} delay={0.6} />
-              </div>
+              <ContactInfoCard icon={MapPin} title="Headquarters" lines={["Office 2807, Churchill Executive Tower", "Business Bay, Dubai, United Arab Emirates"]} delay={0.6} />
             </div>
           </motion.div>
 
@@ -163,9 +167,11 @@ const Contact = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 relative z-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
+                  <label htmlFor="contact_name" className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
                   <input
+                    id="contact_name"
                     type="text"
+                    autoComplete="name"
                     {...register("contact_name_field", { required: "Name is required" })}
                     className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-accent-cyan focus:bg-white/10 transition-all"
                     placeholder="John Doe"
@@ -173,9 +179,11 @@ const Contact = () => {
                   {errors.contact_name_field && <span className="text-red-400 text-xs mt-1 block">{errors.contact_name_field.message as string}</span>}
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Phone Number</label>
+                  <label htmlFor="contact_phone" className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Phone Number</label>
                   <input
+                    id="contact_phone"
                     type="tel"
+                    autoComplete="tel"
                     {...register("contact_phone_field", {
                       required: "Phone is required",
                       pattern: { value: /^[+]?[(]?[0-9]{1,4}[)]?[-\s\./0-9]*$/, message: "Invalid phone number" }
@@ -188,9 +196,11 @@ const Contact = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Business Email</label>
+                <label htmlFor="contact_email" className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Business Email</label>
                 <input
+                  id="contact_email"
                   type="email"
+                  autoComplete="email"
                   {...register("contact_email_field", {
                     required: "Email is required",
                     pattern: { value: /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, message: "Invalid email address" }
@@ -202,8 +212,9 @@ const Contact = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Project Requirements</label>
+                <label htmlFor="contact_message" className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Project Requirements</label>
                 <textarea
+                  id="contact_message"
                   {...register("message", { required: "Message is required" })}
                   rows={4}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-accent-cyan focus:bg-white/10 transition-all resize-none"

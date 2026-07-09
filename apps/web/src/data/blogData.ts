@@ -121,7 +121,7 @@ export const blogData = [
 
       <h2>Critical Integrations</h2>
       <ul>
-        <li><strong>Liquidity Bridges (FIX API):</strong> The most important connection, routing client orders directly to Tier-1 banks and prime brokers for instant execution.</li>
+        <li><strong>Liquidity Bridges (FIX API):</strong> The most important connection, routing client orders directly to Institutional banks and prime brokers for instant execution.</li>
         <li><strong>Payment Gateways (REST API):</strong> Automating deposits and withdrawals securely across crypto, credit cards, and bank wires.</li>
         <li><strong>KYC/AML Providers:</strong> Instant identity verification APIs (like SumSub or Shufti Pro) that check user documents against global watchlists in real-time.</li>
         <li><strong>CRM Webhooks:</strong> Ensuring that every trade, deposit, and login is synced with your central Client Relationship Management system for your sales and retention teams.</li>

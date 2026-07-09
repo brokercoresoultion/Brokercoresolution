@@ -14,11 +14,21 @@ const Layout = () => {
   const [isMobile, setIsMobile] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+  const [webglSupported, setWebglSupported] = useState(true);
 
   useEffect(() => {
     const checkDevice = () => {
       setIsMobile(window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
     };
+    const checkWebGL = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+      } catch (e) {
+        return false;
+      }
+    };
+    setWebglSupported(checkWebGL());
     checkDevice();
     setMounted(true);
     window.addEventListener('resize', checkDevice);
@@ -32,13 +42,13 @@ const Layout = () => {
       </Helmet>
       <div className="home-scroll-container min-h-screen bg-[#0B0B0B] text-white overflow-x-hidden flex flex-col relative">
         <div className="fixed inset-0 z-0 pointer-events-none">
-          {(!mounted || isMobile) ? (
+          {(!mounted || !webglSupported) ? (
             <div className="absolute inset-0 overflow-hidden opacity-30">
               <div className="absolute top-[-10%] left-[-20%] w-[70%] h-[70%] bg-cyan-400/20 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '4s' }} />
               <div className="absolute bottom-[-10%] right-[-20%] w-[70%] h-[70%] bg-white/20 rounded-full blur-[120px] animate-pulse" style={{ animationDuration: '5s', animationDelay: '1s' }} />
             </div>
           ) : (
-            <Canvas dpr={[1, 1.5]} performance={{ min: 0.5 }} camera={{ position: [0, 0, 8], fov: 45 }}>
+            <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
               <Suspense fallback={null}>
                 <Global3DScene />
               </Suspense>

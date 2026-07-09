@@ -4,24 +4,24 @@ import { Plus, Minus } from 'lucide-react';
 
 const faqs = [
   {
-    question: 'What is a Forex Brokerage Turnkey Solution?',
-    answer: 'A Forex Brokerage Turnkey Solution is a complete, pre-configured software and infrastructure package that allows an entity to launch a retail Forex brokerage instantly. BrokerCore Solution provides this by combining a white-label trading platform (MT5 or cTrader), a specialized Forex CRM, Tier-1 liquidity aggregation, and integrated payment gateways into a single deployable ecosystem.',
+    question: 'What services do you provide?',
+    answer: 'We provide B2B technology solutions for brokerages, including White-Label trading platforms, Forex CRM systems, and liquidity bridging infrastructure.',
   },
   {
-    question: 'How does a White-Label Forex CRM integrate with MT5?',
-    answer: 'A White-Label Forex CRM integrates with the MetaTrader 5 (MT5) server via the MT5 Manager API. This connection allows real-time synchronization of client trading accounts, automated deposit and withdrawal processing, multi-tier Introducing Broker (IB) rebate calculations, and KYC/AML compliance tracking directly from the CRM dashboard to the MT5 trading terminal.',
+    question: 'Are you a regulated forex broker?',
+    answer: 'No. BrokerCore is purely a technology and software provider. We supply the infrastructure that independent brokerages use to serve their clients.',
   },
   {
-    question: 'What is a Forex Liquidity Bridge?',
-    answer: 'A Forex Liquidity Bridge is middleware software that connects a retail trading platform (such as MT5 or cTrader) directly to institutional Tier-1 liquidity providers or prime brokers. BrokerCore Solution utilizes FIX API protocols to route client orders to the market in sub-milliseconds, ensuring ultra-low latency execution and deep market depth.',
+    question: 'How does your service work?',
+    answer: 'We deploy and configure the necessary software (CRM, Trading Platforms, Bridging) on secure servers, customize it to your brand, and hand over the administrative controls to your team.',
   },
   {
-    question: 'How long does it take to deploy the MT5 White Label platform?',
-    answer: 'A standard MT5 White Label environment can be fully deployed, branded, and configured within 2 to 4 weeks. This includes the setup of manager terminals, administrative controls, and connection to your selected liquidity providers.',
+    question: 'Who can use your services?',
+    answer: 'Our solutions are designed for new and established retail forex brokers, prop trading firms, and financial institutions looking to upgrade their technological infrastructure.',
   },
   {
-    question: 'Do you provide CRM and Payment Gateway integrations?',
-    answer: 'Yes. We integrate the industry-leading Techysquad CRM, customized to your brand, which features automated KYC/AML onboarding, multi-tier IB management, and pre-integrated crypto and fiat payment gateways for seamless deposits and withdrawals.',
+    question: 'Is forex trading risky?',
+    answer: 'Yes, trading leveraged financial instruments involves substantial risk of loss. It is essential to fully understand these risks and seek independent advice if necessary.',
   }
 ];
 

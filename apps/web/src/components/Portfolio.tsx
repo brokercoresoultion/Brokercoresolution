@@ -18,12 +18,12 @@ const projects = [{
   id: 3,
   slug: 'digital-marketing-agency-site',
   title: 'Liquidity Aggregation Bridge',
-  description: 'Ultra-low latency price feed aggregation and order routing technology.',
+  description: 'optimized latency price feed aggregation and order routing technology.',
   imgKey: "digital marketing agency website on phone"
 }];
 const Portfolio = () => {
   const navigate = useNavigate();
-  const handleProjectClick = (slug: string) => {
+  const handleProjectClick = slug => {
     navigate(`/project/${slug}`);
   };
   return <section id="portfolio" className="py-32">
@@ -47,7 +47,7 @@ const Portfolio = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="group relative aspect-[4/3] rounded-3xl overflow-hidden cursor-pointer border border-[#ffffff15] bg-[#121212]" onClick={() => handleProjectClick('social-media-app')}>
-            <img className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700 ease-out" loading="lazy" alt="A dark-themed social media application interface shown on a smartphone" src="/images/dark_social_trading.png" />
+            <img className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700 ease-out" alt="A dark-themed social media application interface shown on a smartphone" src="/images/dark_social_trading.png" loading="lazy" decoding="async" width="800" height="600" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/40 to-transparent"></div>
             
             <div className="absolute inset-4 top-auto rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
@@ -63,7 +63,7 @@ const Portfolio = () => {
           </div>
 
           <div className="group relative aspect-[4/3] rounded-3xl overflow-hidden cursor-pointer border border-[#ffffff15] bg-[#121212]" onClick={() => handleProjectClick('fintech-dashboard')}>
-            <img className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700 ease-out" loading="lazy" alt="A fintech application dashboard with payment details, displayed on a smartphone next to a keyboard" src="/images/fintech_dashboard.png" />
+            <img className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700 ease-out" alt="A fintech application dashboard with payment details, displayed on a smartphone next to a keyboard" src="/images/fintech_dashboard.png" loading="lazy" decoding="async" width="800" height="600" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/40 to-transparent"></div>
             
             <div className="absolute inset-4 top-auto rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
@@ -79,7 +79,7 @@ const Portfolio = () => {
           </div>
 
           <div className="group relative aspect-[4/3] rounded-3xl overflow-hidden cursor-pointer border border-[#ffffff15] bg-[#121212]" onClick={() => handleProjectClick('digital-marketing-agency-site')}>
-            <img className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700 ease-out" loading="lazy" alt="A digital marketing agency website homepage, shown on a smartphone with a sleek, modern design" src="/images/analytics_dashboard.png" />
+            <img className="w-full h-full object-cover opacity-80 group-hover:scale-105 group-hover:opacity-100 transition-all duration-700 ease-out" alt="A digital marketing agency website homepage, shown on a smartphone with a sleek, modern design" src="/images/analytics_dashboard.png" loading="lazy" decoding="async" width="800" height="600" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/40 to-transparent"></div>
             
             <div className="absolute inset-4 top-auto rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 p-6 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">

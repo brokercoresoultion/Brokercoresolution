@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/lib/supabase';
 import { X, CheckCircle2, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { sendEmailNotification } from '@/lib/sendEmailNotification';
 
 interface DemoModalProps {
   isOpen: boolean;
@@ -63,6 +64,8 @@ const DemoModal = ({ isOpen, onClose }: DemoModalProps) => {
 
       const { error } = await supabase.from('leads').insert(newLead);
       if (error) throw error;
+
+      await sendEmailNotification(newLead);
 
       setIsSuccess(true);
       setTimeout(() => {
@@ -139,6 +142,8 @@ const DemoModal = ({ isOpen, onClose }: DemoModalProps) => {
                         <input
                           type="text"
                           name="name"
+                          aria-label="Full Name"
+                          autoComplete="name"
                           value={formData.name}
                           onChange={handleChange}
                           placeholder="Full Name"
@@ -151,6 +156,8 @@ const DemoModal = ({ isOpen, onClose }: DemoModalProps) => {
                         <input
                           type="email"
                           name="email"
+                          aria-label="Work Email"
+                          autoComplete="email"
                           value={formData.email}
                           onChange={handleChange}
                           placeholder="Work Email"
@@ -164,6 +171,8 @@ const DemoModal = ({ isOpen, onClose }: DemoModalProps) => {
                           <input
                             type="text"
                             name="company"
+                            aria-label="Company"
+                            autoComplete="organization"
                             value={formData.company}
                             onChange={handleChange}
                             placeholder="Company"
@@ -175,6 +184,8 @@ const DemoModal = ({ isOpen, onClose }: DemoModalProps) => {
                           <input
                             type="tel"
                             name="phone"
+                            aria-label="Phone Number"
+                            autoComplete="tel"
                             value={formData.phone}
                             onChange={handleChange}
                             placeholder="Phone Number"

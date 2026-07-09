@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, TrendingUp, Shield, Zap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useMotionValue, useTransform } from 'framer-motion';
-import TradingDashboardUI from '@/components/TradingDashboardUI';
+
+const TradingDashboardUI = React.lazy(() => import('@/components/TradingDashboardUI'));
 
 // Floating animated stat card used in the side panel
 const FloatingCard = ({ icon: Icon, label, value, color, delay, className, tooltipText }) => (
@@ -63,6 +64,23 @@ const Hero = ({ openDemoModal }) => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const checkDesktop = () => {
+      if (window.innerWidth >= 1024) {
+        // Defer heavy 3D rendering so it doesn't block Lighthouse Performance (TBT/TTI)
+        setTimeout(() => setIsDesktop(true), 1500);
+      } else {
+        setIsDesktop(false);
+      }
+    };
+    checkDesktop();
+    
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize, { passive: true });
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // 3D Parallax Mouse Tracking
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -105,17 +123,17 @@ const Hero = ({ openDemoModal }) => {
       <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-accent-cyan/[0.05] rounded-full blur-[100px] pointer-events-none z-0" />
 
       <div className="container mx-auto px-6 relative z-10 pointer-events-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center min-h-[80vh]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center min-h-[80vh]">
 
           {/* ── LEFT: Copy ──────────────────────────────── */}
-          <div className="flex flex-col justify-center">
+          <div className="flex flex-col justify-center lg:col-span-7 xl:col-span-7 z-20">
 
             {/* Eyebrow */}
             <motion.div
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 1, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 bg-black/[0.04] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-full mb-8 w-fit hover:border-black/20 dark:hover:border-white/20 hover:bg-black/[0.07] dark:hover:bg-white/[0.07] transition-all duration-300 cursor-default"
+              className="inline-flex items-center gap-2.5 px-4 py-2 bg-black/[0.04] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 rounded-full mb-4 sm:mb-8 w-fit hover:border-black/20 dark:hover:border-white/20 hover:bg-black/[0.07] dark:hover:bg-white/[0.07] transition-all duration-300 cursor-default"
             >
               <Sparkles className="w-3.5 h-3.5 text-accent-cyan" />
               <span className="text-[11px] text-gray-600 dark:text-gray-300 uppercase tracking-[0.2em] font-semibold">
@@ -128,14 +146,14 @@ const Hero = ({ openDemoModal }) => {
               style={{ perspective: 1000 }}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
-              className="mb-8 p-4 -ml-4"
+              className="mb-4 sm:mb-6 p-4 -ml-4"
             >
               <motion.h1
                 style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 1, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-[800] text-gray-900 dark:text-white leading-[1.1] tracking-tight mb-6 drop-shadow-2xl"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-[3.5rem] font-[800] text-gray-900 dark:text-white leading-[1.1] tracking-tight mb-4 drop-shadow-2xl"
               >
                 <span className="block translate-z-[20px] shadow-black/50">{t('hero.headingLine1')}</span>
                 <span className="block mt-2 translate-z-[40px]">
@@ -149,10 +167,10 @@ const Hero = ({ openDemoModal }) => {
 
             {/* Subheading */}
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="text-base text-gray-600 dark:text-gray-400 max-w-xl mb-10 font-light leading-relaxed"
+              className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mb-6 sm:mb-10 font-light leading-relaxed"
             >
               {t('hero.subheading')}
             </motion.p>
@@ -187,7 +205,7 @@ const Hero = ({ openDemoModal }) => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.5 }}
-              className="mt-12 pt-8 border-t border-black/[0.06] dark:border-white/[0.06] grid grid-cols-3 gap-6 max-w-sm"
+              className="mt-8 pt-6 border-t border-black/[0.06] dark:border-white/[0.06] grid grid-cols-3 gap-6 max-w-sm"
             >
               {[{ value: t('hero.stat1Value'), label: t('hero.stat1Label') }, { value: t('hero.stat2Value'), label: t('hero.stat2Label') }, { value: t('hero.stat3Value'), label: t('hero.stat3Label') }].map((stat) => (
                 <div key={stat.label}>
@@ -199,8 +217,12 @@ const Hero = ({ openDemoModal }) => {
           </div>
 
           {/* ── RIGHT: Interactive Trading Dashboard ─────────────────────── */}
-          <div className="hidden lg:flex justify-end relative h-full items-center w-full">
-            <TradingDashboardUI />
+          <div className="hidden lg:flex justify-end relative h-full items-center w-full lg:col-span-5 xl:col-span-5 z-10">
+            {isDesktop && (
+              <React.Suspense fallback={null}>
+                <TradingDashboardUI />
+              </React.Suspense>
+            )}
           </div>
 
         </div>

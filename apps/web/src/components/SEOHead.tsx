@@ -40,9 +40,11 @@ const SEOHead = ({
                 "@type": "Organization",
                 "@id": "https://www.brokercoresolution.com/#organization",
                 "name": "BrokerCore Solution",
+                "alternateName": "BrokerCore Forex Turnkey Solutions",
                 "url": "https://www.brokercoresolution.com",
                 "logo": "https://www.brokercoresolution.com/logo.png",
-                "description": "B2B provider of Forex Brokerage Turnkey Solutions, White-Label Trading Platforms, and Tier-1 Liquidity integration.",
+                "description": "B2B provider of Forex Brokerage Turnkey Solutions, White-Label Trading Platforms, and Institutional Liquidity integration.",
+                "knowsAbout": ["Forex Turnkey Solutions", "MT4/MT5 White Label", "Forex CRM", "Liquidity Aggregation", "Forex Broker Setup"],
                 "sameAs": [
                   "https://www.linkedin.com/company/brokercoresolution",
                   "https://twitter.com/brokercoresolution",
@@ -89,7 +91,7 @@ const SEOHead = ({
                     "name": "What is a Forex Brokerage Turnkey Solution?",
                     "acceptedAnswer": {
                       "@type": "Answer",
-                      "text": "A Forex Brokerage Turnkey Solution is a complete, pre-configured software and infrastructure package that allows an entity to launch a retail Forex brokerage instantly. BrokerCore Solution provides this by combining a white-label trading platform (MT5 or cTrader), a specialized Forex CRM, Tier-1 liquidity aggregation, and integrated payment gateways into a single deployable ecosystem."
+                      "text": "A Forex Brokerage Turnkey Solution is a complete, pre-configured software and infrastructure package that allows an entity to launch a retail Forex brokerage instantly. BrokerCore Solution provides this by combining a white-label trading platform (MT5 or cTrader), a specialized Forex CRM, Institutional liquidity aggregation, and integrated payment gateways into a single deployable ecosystem."
                     }
                   },
                   {

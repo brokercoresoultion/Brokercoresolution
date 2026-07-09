@@ -19,6 +19,7 @@ export default function AdminDashboard() {
   const [subscribers, setSubscribers] = useState<any[]>([]);
   const [editingSubscriber, setEditingSubscriber] = useState<any>(null);
   const [maintenanceMode, setMaintenanceMode] = useState('Disable');
+  const [emailNotifications, setEmailNotifications] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<any>(null);
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
   const [blogs, setBlogs] = useState(() => {
@@ -167,14 +168,19 @@ export default function AdminDashboard() {
           supabase.from('leads').select('*').order('created_at', { ascending: false }),
           supabase.from('subscribers').select('*').order('created_at', { ascending: false }),
           supabase.from('blogs').select('id, created_at, title, author_name, date, category, status, cover_image').order('created_at', { ascending: false }),
-          supabase.from('settings').select('*').eq('key', 'maintenance_mode').single(),
+          supabase.from('settings').select('*').in('key', ['maintenance_mode', 'email_notifications']),
           supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(100)
         ]);
 
         if (!leadsError && dbLeads) setLeads(dbLeads); else setLeads([]);
         if (!subsError && dbSubscribers) setSubscribers(dbSubscribers); else setSubscribers([]);
         if (!blogsError && dbBlogs) setBlogs(dbBlogs); else setBlogs([]);
-        if (settingsData) setMaintenanceMode(settingsData.value);
+        if (settingsData) {
+          const mMode = settingsData.find((s:any) => s.key === 'maintenance_mode');
+          if (mMode) setMaintenanceMode(mMode.value);
+          const eNotif = settingsData.find((s:any) => s.key === 'email_notifications');
+          if (eNotif) setEmailNotifications(eNotif.value === 'true');
+        }
         if (dbLogs) setLogs(dbLogs);
 
       } catch (err) {
@@ -212,11 +218,17 @@ export default function AdminDashboard() {
           setLogs(prev => [payload.new, ...prev].slice(0, 100));
       }).subscribe();
 
+    // Auto-refresh data every 1 minute
+    const refreshInterval = setInterval(() => {
+      initDashboard();
+    }, 60000);
+
     return () => {
       supabase.removeChannel(leadsSubscription);
       supabase.removeChannel(subscribersSubscription);
       supabase.removeChannel(blogsSubscription);
       supabase.removeChannel(logsSubscription);
+      clearInterval(refreshInterval);
     };
   }, [navigate]);
 
@@ -229,7 +241,7 @@ export default function AdminDashboard() {
           supabase.auth.signOut();
           localStorage.removeItem('adminAuth');
           toast.error('Session expired due to inactivity');
-          navigate('/admin');
+          navigate('/');
         } catch (e) {}
       }, 15 * 60 * 1000); // 15 minutes
     };
@@ -247,7 +259,7 @@ export default function AdminDashboard() {
       await supabase.auth.signOut();
       localStorage.removeItem('adminAuth');
     } catch (e) {}
-    navigate('/admin');
+    navigate('/');
   };
 
   const handleStatusChange = async (leadId: any, newStatus: any) => {
@@ -267,9 +279,12 @@ export default function AdminDashboard() {
 
   const handleSaveSettings = async () => {
     try {
-      await supabase.from('settings').upsert({ key: 'maintenance_mode', value: maintenanceMode });
+      await Promise.all([
+        supabase.from('settings').upsert({ key: 'maintenance_mode', value: maintenanceMode }),
+        supabase.from('settings').upsert({ key: 'email_notifications', value: emailNotifications ? 'true' : 'false' })
+      ]);
       toast.success('Settings saved successfully!');
-      await logAction('Updated Settings', `Maintenance Mode: ${maintenanceMode}`);
+      await logAction('Updated Settings', `Maintenance Mode: ${maintenanceMode}, Email Notifications: ${emailNotifications}`);
     } catch (err) {
       toast.error('Failed to save settings');
     }
@@ -967,6 +982,20 @@ export default function AdminDashboard() {
             </div>
           </div>
 
+          <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/10 border border-cyan-500/20 rounded-xl p-6 mb-8">
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-cyan-400" /> Compose Broadcast (Demo)</h2>
+            <div className="space-y-4">
+              <input type="text" placeholder="Email Subject" className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-400" />
+              <textarea placeholder="Write your newsletter content here..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-400" />
+              <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
+                <span className="text-xs text-gray-500">This will be sent to all {subscribers.length} subscribers. (Demo Mode: Emails won't actually send)</span>
+                <button onClick={() => alert('Demo Mode: In production, this would dispatch emails via SendGrid/EmailJS.')} className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold uppercase tracking-wider rounded-lg text-sm transition-colors whitespace-nowrap">
+                  Send Broadcast
+                </button>
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-lg">
             {/* Mobile View */}
             <div className="md:hidden space-y-3">
@@ -1047,7 +1076,7 @@ export default function AdminDashboard() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan="3" className="py-8 text-center text-gray-500">No newsletter subscribers yet.</td>
+                      <td colSpan={4} className="py-8 text-center text-gray-500">No newsletter subscribers yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1279,7 +1308,12 @@ export default function AdminDashboard() {
                     <p className="text-xs text-gray-500">Receive alerts for new leads.</p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" value="" className="sr-only peer" defaultChecked />
+                    <input 
+                      type="checkbox" 
+                      className="sr-only peer" 
+                      checked={emailNotifications}
+                      onChange={(e) => setEmailNotifications(e.target.checked)}
+                    />
                     <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-400"></div>
                   </label>
                 </div>
@@ -2049,6 +2083,13 @@ export default function AdminDashboard() {
             </div>
           </div>
           <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-3 w-full px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+          >
+            <ArrowUpRight className="w-5 h-5" />
+            <span className="font-medium">Go to Website</span>
+          </button>
+          <button
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
           >
@@ -2069,9 +2110,14 @@ export default function AdminDashboard() {
             <img src="/logo.png" alt="BrokerCore Solution" className="h-8 w-auto bg-white p-1 rounded-lg" />
             <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-gray-300">Admin Panel</span>
           </h2>
-          <button onClick={handleLogout} className="text-red-400 p-2">
-            <LogOut className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => navigate('/')} className="text-gray-400 hover:text-white p-2" title="Go to Website">
+              <ArrowUpRight className="w-5 h-5" />
+            </button>
+            <button onClick={handleLogout} className="text-red-400 p-2" title="Logout">
+              <LogOut className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto pb-24 md:pb-8">
@@ -2082,20 +2128,41 @@ export default function AdminDashboard() {
         <style>{`
           .hide-scrollbar::-webkit-scrollbar { display: none; }
         `}</style>
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0a0f1c]/95 backdrop-blur-xl border-t border-white/10 z-50 px-4 py-3 flex overflow-x-auto gap-6 hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div 
+          className="md:hidden fixed bottom-4 left-4 right-4 bg-[#0a0f1c]/90 backdrop-blur-2xl border border-white/10 rounded-2xl z-50 px-2 py-2 flex overflow-x-auto gap-2 hide-scrollbar shadow-[0_10px_40px_-10px_rgba(0,0,0,0.5)]" 
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
           {SIDEBAR_TABS.filter(tab => tab.show).map((tab) => {
             const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
             return (
-              <button
+              <motion.button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex flex-col items-center gap-1 flex-shrink-0 transition-colors ${
-                  activeTab === tab.id ? 'text-cyan-400' : 'text-gray-500 hover:text-gray-300'
+                whileTap={{ scale: 0.95 }}
+                className={`relative flex flex-col items-center justify-center gap-1 flex-shrink-0 transition-colors min-w-[72px] px-2 py-2 rounded-xl overflow-hidden ${
+                  isActive ? 'text-cyan-400' : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
-                <Icon className="w-5 h-5" />
-                <span className="text-[10px] font-medium">{tab.mobileLabel}</span>
-              </button>
+                {isActive && (
+                  <motion.div
+                    layoutId="mobileNavActiveBackground"
+                    className="absolute inset-0 bg-cyan-500/10 border border-cyan-500/30 rounded-xl"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                  />
+                )}
+                <motion.div 
+                  className="relative z-10 flex flex-col items-center gap-1"
+                  animate={{ y: isActive ? -2 : 0 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-[10px] font-semibold tracking-wide">{tab.mobileLabel}</span>
+                </motion.div>
+              </motion.button>
             );
           })}
         </div>

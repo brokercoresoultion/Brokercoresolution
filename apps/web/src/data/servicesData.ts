@@ -50,7 +50,7 @@ export const SERVICES_DATA = {
     accent: 'cyan',
 
     overview: [
-      `Regulatory licensing is the single most critical determinant of a brokerage's operational credibility, banking relationships, and long-term institutional survivability. BROKERCORESOLUTION provides a comprehensive, end-to-end licensing facilitation service across the full spectrum of global financial regulatory frameworks — from offshore Tier-3 jurisdictions designed for rapid market entry to fully regulated Tier-1 European and Middle Eastern regimes. Our legal and compliance team maintains active relationships with regulatory bodies across Mauritius, Cyprus, the Seychelles, the British Virgin Islands, Saint Vincent & the Grenadines, the UAE (ADGM / DIFC), and Labuan Malaysia — enabling BROKERCORESOLUTION to deliver jurisdiction-matched regulatory advice based on your target client geography, capital position, and operational risk appetite.`,
+      `Regulatory licensing is the single most critical determinant of a brokerage's operational credibility, banking relationships, and long-term institutional survivability. BROKERCORESOLUTION provides a comprehensive, end-to-end licensing facilitation service across the full spectrum of global financial regulatory frameworks — from offshore Tier-3 jurisdictions designed for rapid market entry to fully regulated Institutional European and Middle Eastern regimes. Our legal and compliance team maintains active relationships with regulatory bodies across Mauritius, Cyprus, the Seychelles, the British Virgin Islands, Saint Vincent & the Grenadines, the UAE (ADGM / DIFC), and Labuan Malaysia — enabling BROKERCORESOLUTION to deliver jurisdiction-matched regulatory advice based on your target client geography, capital position, and operational risk appetite.`,
 
       `The licensing process is executed through a structured compliance pipeline: entity incorporation is completed in parallel with the preparation of the regulatory application dossier, including the Business Plan, AML/CFT Policy Manual, Risk Management Framework, Compliance Monitoring Program, and all required director/shareholder due diligence documentation. For FSC Mauritius engagements, our team prepares the Investment Dealer (Full-Service Dealer) or Investment Dealer (Broker) license application and manages all back-and-forth correspondence with the FSC on your behalf. For CySEC-ready structures, we build the full Cyprus Investment Firm (CIF) application package, coordinate with local Cyprus legal counsel, and facilitate the appointment of compliance officers, internal auditors, and risk managers that meet CySEC's MiFID II personnel fit-and-proper requirements.`,
 
@@ -70,7 +70,7 @@ export const SERVICES_DATA = {
       'Passporting advisory for CySEC entities seeking EEA cross-border notification under MiFID II Article 34 / Article 35',
     ],
 
-    businessValue: `A licensed brokerage commands 3–5x the institutional credibility of an unlicensed offshore operation, unlocking access to Tier-1 prime brokerage credit lines, international payment processor approvals, and institutional client acquisition channels that are categorically unavailable to unregulated entities. BROKERCORESOLUTION's licensing facilitation eliminates the 12–18 month learning curve that kills most self-directed licensing attempts, compressing your regulatory approval timeline to as little as 60–90 days for select jurisdictions. This speed-to-market advantage translates directly into earlier revenue generation, earlier capital deployment, and a sustainable competitive moat in an increasingly regulated global FX market.`,
+    businessValue: `A licensed brokerage commands 3–5x the institutional credibility of an unlicensed offshore operation, unlocking access to Institutional prime brokerage credit lines, international payment processor approvals, and institutional client acquisition channels that are categorically unavailable to unregulated entities. BROKERCORESOLUTION's licensing facilitation eliminates the 12–18 month learning curve that kills most self-directed licensing attempts, compressing your regulatory approval timeline to as little as 60–90 days for select jurisdictions. This speed-to-market advantage translates directly into earlier revenue generation, earlier capital deployment, and a sustainable competitive moat in an increasingly regulated global FX market.`,
   },
 
   // ── MODULE 2 ── HOSTING SERVER SUPPORT ──────────────────────────────────────
@@ -80,7 +80,7 @@ export const SERVICES_DATA = {
     module: 'Hosting Server Support',
     moduleSlug: 'hosting-server-support',
     title: 'Hosting Server Support',
-    subtitle: 'Ultra-Low Latency Co-Location Infrastructure',
+    subtitle: 'optimized latency Co-Location Infrastructure',
     metric: { label: 'Execution Latency', value: '<0.01s', unit: 'Round Trip' },
     heroTag: 'Module 03 — Infrastructure',
     accent: 'purple',
@@ -95,7 +95,7 @@ export const SERVICES_DATA = {
 
     specs: [
       'Co-location in Equinix LD4 (UK), NY4 (USA), and TY3 (Japan): the three primary global FX execution hubs',
-      'Cross-connect physical fiber paths to Tier-1 liquidity providers: eliminates multi-hop latency degradation',
+      'Cross-connect physical fiber paths to Institutional liquidity providers: eliminates multi-hop latency degradation',
       'Sub-millisecond intra-datacenter order routing latency; <0.01s full round-trip execution profile',
       '99.99% network uptime SLA with contractual remediation credits and real-time status dashboard',
       'Dedicated bare-metal server provisioning for MT5 Server (Manager API + Dealer API), MT5 Gateway, and CRM backend',
@@ -117,17 +117,17 @@ export const SERVICES_DATA = {
     module: 'Liquidity Provider',
     moduleSlug: 'liquidity-provider',
     title: 'Liquidity Provider',
-    subtitle: 'Tier-1 Deep Order-Book Connections',
+    subtitle: 'Institutional Deep Order-Book Connections',
     metric: { label: 'Raw Spread From', value: '0.0', unit: 'Pips (Interbank)' },
     heroTag: 'Module 04 — Liquidity',
     accent: 'cyan',
 
     overview: [
-      `BROKERCORESOLUTION aggregates institutional liquidity from a curated panel of Tier-1 Prime Brokers and Prime-of-Prime (PoP) liquidity providers, delivering a consolidated, deep order book that covers 80+ FX currency pairs, Spot Metals (XAU/USD, XAG/USD), Energy CFDs (Brent Crude, WTI, Natural Gas), Equity Indices, and Cryptocurrency CFDs (BTC/USD, ETH/USD, and 20+ altcoin pairs) — all accessible through a single LP connectivity agreement. Our multi-venue aggregation engine applies smart order routing (SOR) logic to each incoming trade request, dynamically selecting the best available bid/offer from the aggregated pool based on price, depth, and venue reliability scores computed in real time. This SOR architecture ensures your clients consistently receive best execution, while your brokerage minimizes reject rates and latency variance across market conditions.`,
+      `BROKERCORESOLUTION aggregates institutional liquidity from a curated panel of Institutional Prime Brokers and Prime-of-Prime (PoP) liquidity providers, delivering a consolidated, deep order book that covers 80+ FX currency pairs, Spot Metals (XAU/USD, XAG/USD), Energy CFDs (Brent Crude, WTI, Natural Gas), Equity Indices, and Cryptocurrency CFDs (BTC/USD, ETH/USD, and 20+ altcoin pairs) — all accessible through a single LP connectivity agreement. Our multi-venue aggregation engine applies smart order routing (SOR) logic to each incoming trade request, dynamically selecting the best available bid/offer from the aggregated pool based on price, depth, and venue reliability scores computed in real time. This SOR architecture ensures your clients consistently receive best execution, while your brokerage minimizes reject rates and latency variance across market conditions.`,
 
       `The pricing architecture operates on a Non-Dealing Desk (NDD) / Straight Through Processing (STP) model — meaning your clients' orders are transmitted directly to the interbank liquidity pool without internal dealer intervention, eliminating the conflict-of-interest inherent in B-Book market-maker models. Raw interbank spreads from 0.0 pips are passed through to your MT5 gateway, over which your brokerage applies a configurable spread markup via the BROKERCORESOLUTION Spread Management Plugin — enabling you to engineer precise margin capture per instrument and per client segment without touching the underlying raw feed. Liquidity depth is provided at multiple price levels (top-of-book, Level 2 depth), giving your risk desk real-time visibility into market impact thresholds and enabling informed A-Book routing decisions for large-notional institutional client orders.`,
 
-      `Our LP connectivity is delivered via industry-standard FIX 4.4 / FIX 5.0 protocol, with full session management, heartbeat monitoring, and automatic reconnection logic built into our gateway middleware. For MT5 White-Label deployments, liquidity is bridged through our certified Gateway infrastructure (compatible with MetaQuotes' MT5 server architecture), eliminating the need for your brokerage to manage LP connectivity independently. BROKERCORESOLUTION maintains active liquidity relationships with institutional counterparties including Tier-1 bank market makers and regulated Prime-of-Prime providers — ensuring that your brokerage's credit line and aggregated liquidity remain available even during high-volatility tail-risk events such as central bank interventions or geopolitical black-swan episodes.`,
+      `Our LP connectivity is delivered via industry-standard FIX 4.4 / FIX 5.0 protocol, with full session management, heartbeat monitoring, and automatic reconnection logic built into our gateway middleware. For MT5 White-Label deployments, liquidity is bridged through our certified Gateway infrastructure (compatible with MetaQuotes' MT5 server architecture), eliminating the need for your brokerage to manage LP connectivity independently. BROKERCORESOLUTION maintains active liquidity relationships with institutional counterparties including Institutional bank market makers and regulated Prime-of-Prime providers — ensuring that your brokerage's credit line and aggregated liquidity remain available even during high-volatility tail-risk events such as central bank interventions or geopolitical black-swan episodes.`,
     ],
 
     specs: [
@@ -141,11 +141,11 @@ export const SERVICES_DATA = {
       'Non-Dealing Desk (NDD) / Straight Through Processing (STP) architecture: zero dealer intervention model',
       'Level 2 order book depth: top-of-book + full depth-of-market (DOM) data for risk desk visibility',
       'Configurable spread markup engine: per-instrument, per-account-group, per-client-tier markup calibration via MT5 plugin',
-      'No-last-look execution available on premium LP tiers: institutional fill guarantee at quoted price',
+      'No-last-look execution available on premium LP tiers: reliable order fill rates at quoted price',
       'Post-trade reporting: full FIX execution reports, trade confirmations, and end-of-day position reconciliation feeds',
     ],
 
-    businessValue: `Access to deep, aggregated Tier-1 liquidity is the single most powerful differentiator between a premium brokerage brand and a commodity white-label. BROKERCORESOLUTION's LP aggregation eliminates the minimum volume thresholds and credit pre-approval timelines that prevent startup brokers from accessing direct prime brokerage relationships — delivering institutional-quality pricing from day one. The NDD/STP model removes dealer risk from your operational equation, converting your brokerage's revenue model from a directional bet on client losses to a sustainable, volume-driven spread capture business. Coupled with our configurable markup engine, BROKERCORESOLUTION enables your brokerage to achieve a blended spread revenue margin of 0.3–1.2 pips per round-turn across your instrument suite — generating predictable, scalable fee income that grows linearly with your client trading volume.`,
+    businessValue: `Access to deep, aggregated Institutional liquidity is the single most powerful differentiator between a premium brokerage brand and a commodity white-label. BROKERCORESOLUTION's LP aggregation eliminates the minimum volume thresholds and credit pre-approval timelines that prevent startup brokers from accessing direct prime brokerage relationships — delivering institutional-quality pricing from day one. The NDD/STP model removes dealer risk from your operational equation, converting your brokerage's revenue model from a directional bet on client losses to a sustainable, volume-driven spread capture business. Coupled with our configurable markup engine, BROKERCORESOLUTION enables your brokerage to achieve a blended spread revenue margin of 0.3–1.2 pips per round-turn across your instrument suite — generating predictable, scalable fee income that grows linearly with your client trading volume.`,
   },
 
   // ── MODULE 4 ── GATEWAY SOLUTIONS ───────────────────────────────────────────
