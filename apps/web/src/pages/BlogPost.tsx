@@ -76,6 +76,8 @@ const BlogPost = () => {
 
         if (data) {
           setPost(data);
+          // Safely attempt to increment view count
+          supabase.rpc('increment_blog_view', { blog_slug: slug }).catch(e => console.log('View tracking error or not setup:', e));
         } else {
           setError('Post Not Found');
         }

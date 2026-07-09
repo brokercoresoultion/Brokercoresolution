@@ -22,7 +22,7 @@ const Home = () => {
       <SEOHead 
         title="BrokerCoreSolution | Premier Forex Turnkey & White Label Provider"
         description="Launch and scale your Forex brokerage with our complete White Label & Turnkey Solution. MT4/MT5, CRM, Liquidity, Payment Gateway, KYC, Back Office & 24/7 Expert Support."
-        keywords="Forex Broker Turnkey, MT5 White Label, Forex CRM, Forex Liquidity, Broker Setup, Start a Forex Broker"
+        keywords="Forex, Broker CRM, MT4/MT5, Liquidity, Brokerage Technology, Turnkey Broker Setup, Forex White Label"
       />
 
       <Hero openDemoModal={openDemoModal} />

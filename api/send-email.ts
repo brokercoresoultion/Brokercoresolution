@@ -1,8 +1,11 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export default async function handler(req: any, res: any) {
+  if (!process.env.RESEND_API_KEY) {
+    return res.status(500).json({ error: 'Missing RESEND_API_KEY in Vercel Environment Variables' });
+  }
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -15,7 +18,7 @@ export default async function handler(req: any, res: any) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'BrokerCore System <onboarding@resend.dev>', // Resend testing domain
+      from: 'BrokerCore Leads <leads@brokercoresolution.com>',
       to: [toEmail],
       subject: `New Lead: ${lead.name} (${lead.interest || 'Contact Form'})`,
       html: `

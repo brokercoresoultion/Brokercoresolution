@@ -138,6 +138,11 @@ function App() {
     const secretWord = 'brokercore';
 
     const handleKeyDown = (e: KeyboardEvent) => {
+      // If already on admin page, ignore the hotkey
+      if (window.location.pathname.startsWith('/admin')) {
+        return;
+      }
+      
       // Shortcut 1: Ctrl + Shift + A
       if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'a') {
         e.preventDefault();

@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import React, { useEffect, useState } from 'react';
 import Admin3DBackground from '@/components/Admin3DBackground';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Users, Settings, Mail, Activity, ArrowUpRight, BarChart as BarChartIcon, FileText, Eye, EyeOff, Calculator } from 'lucide-react';
+import { LogOut, LayoutDashboard, Users, Settings, Mail, Activity, ArrowUpRight, BarChart as BarChartIcon, FileText, Eye, EyeOff, Calculator, Star, CheckCircle, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import ReactQuill from 'react-quill';
@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [emailNotifications, setEmailNotifications] = useState(false);
   const [currentAdmin, setCurrentAdmin] = useState<any>(null);
   const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
   const [blogs, setBlogs] = useState(() => {
     const saved = localStorage.getItem('adminBlogs');
     return saved ? JSON.parse(saved) : [];
@@ -35,6 +36,49 @@ export default function AdminDashboard() {
   const [selectedQuotes, setSelectedQuotes] = useState<string[]>([]);
   const [selectedSubscribers, setSelectedSubscribers] = useState<string[]>([]);
   const [selectedBlogs, setSelectedBlogs] = useState<string[]>([]);
+  
+  const [broadcastSubject, setBroadcastSubject] = useState('');
+  const [broadcastContent, setBroadcastContent] = useState('');
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
+
+  const handleSendBroadcast = async () => {
+    if (!broadcastSubject.trim() || !broadcastContent.trim()) {
+      toast.error('Please enter a subject and content for the newsletter');
+      return;
+    }
+    if (subscribers.length === 0) {
+      toast.error('No subscribers to send to');
+      return;
+    }
+
+    setIsBroadcasting(true);
+    const loadingToast = toast.loading('Sending broadcast...');
+    
+    try {
+      const response = await fetch('/api/send-newsletter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subject: broadcastSubject,
+          content: broadcastContent,
+          emails: subscribers.map((sub: any) => sub.email)
+        }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error?.message || 'Failed to send broadcast');
+
+      toast.success('Newsletter broadcasted successfully!', { id: loadingToast });
+      setBroadcastSubject('');
+      setBroadcastContent('');
+      await logAction('Newsletter Broadcast', `Sent to ${subscribers.length} subscribers`);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || 'Error sending broadcast', { id: loadingToast });
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
 
   const handleBulkDeleteLeads = async (isQuotes = false) => {
     const selected = isQuotes ? selectedQuotes : selectedLeads;
@@ -157,31 +201,41 @@ export default function AdminDashboard() {
           }
         }
 
-        // Fetch all data in parallel for much faster loading
-        const [
-          { data: dbLeads, error: leadsError },
-          { data: dbSubscribers, error: subsError },
-          { data: dbBlogs, error: blogsError },
-          { data: settingsData },
-          { data: dbLogs }
-        ] = await Promise.all([
-          supabase.from('leads').select('*').order('created_at', { ascending: false }),
-          supabase.from('subscribers').select('*').order('created_at', { ascending: false }),
-          supabase.from('blogs').select('id, created_at, title, author_name, date, category, status, cover_image').order('created_at', { ascending: false }),
-          supabase.from('settings').select('*').in('key', ['maintenance_mode', 'email_notifications']),
-          supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(100)
-        ]);
+        const fetchData = async () => {
+          try {
+            const [
+              { data: dbLeads, error: leadsError },
+              { data: dbSubscribers, error: subsError },
+              { data: dbBlogs, error: blogsError },
+              { data: dbLogs },
+              { data: dbTestimonials }
+            ] = await Promise.all([
+              supabase.from('leads').select('*').order('created_at', { ascending: false }),
+              supabase.from('subscribers').select('*').order('created_at', { ascending: false }),
+              supabase.from('blogs').select('*').order('created_at', { ascending: false }),
+              supabase.from('admin_logs').select('*').order('created_at', { ascending: false }).limit(100),
+              supabase.from('testimonials').select('*').order('created_at', { ascending: false })
+            ]);
+            
+            if (!leadsError && dbLeads) setLeads(dbLeads);
+            if (!subsError && dbSubscribers) setSubscribers(dbSubscribers);
+            if (!blogsError && dbBlogs) setBlogs(dbBlogs);
+            if (dbLogs) setLogs(dbLogs);
+            if (dbTestimonials) setTestimonials(dbTestimonials);
+          } catch (err) {
+            console.error("Auto-refresh error:", err);
+          }
+        };
 
-        if (!leadsError && dbLeads) setLeads(dbLeads); else setLeads([]);
-        if (!subsError && dbSubscribers) setSubscribers(dbSubscribers); else setSubscribers([]);
-        if (!blogsError && dbBlogs) setBlogs(dbBlogs); else setBlogs([]);
+        await fetchData();
+
+        const { data: settingsData } = await supabase.from('settings').select('*').in('key', ['maintenance_mode', 'email_notifications']);
         if (settingsData) {
           const mMode = settingsData.find((s:any) => s.key === 'maintenance_mode');
           if (mMode) setMaintenanceMode(mMode.value);
           const eNotif = settingsData.find((s:any) => s.key === 'email_notifications');
           if (eNotif) setEmailNotifications(eNotif.value === 'true');
         }
-        if (dbLogs) setLogs(dbLogs);
 
       } catch (err) {
         console.error("Dashboard initialization error:", err);
@@ -191,7 +245,6 @@ export default function AdminDashboard() {
 
     initDashboard();
 
-    // Supabase Realtime Subscriptions to auto-update UI without refreshing
     const leadsSubscription = supabase.channel('public:leads')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, (payload) => {
         if (payload.eventType === 'INSERT') setLeads(prev => [payload.new, ...prev]);
@@ -206,6 +259,13 @@ export default function AdminDashboard() {
         else if (payload.eventType === 'UPDATE') setSubscribers(prev => prev.map((item: any) => String(item.id) === String(payload.new.id) ? payload.new : item));
       }).subscribe();
 
+    const testimonialsSubscription = supabase.channel('public:testimonials')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'testimonials' }, (payload) => {
+        if (payload.eventType === 'INSERT') setTestimonials(prev => [payload.new, ...prev]);
+        else if (payload.eventType === 'DELETE') setTestimonials(prev => prev.filter((item: any) => String(item.id) !== String(payload.old.id)));
+        else if (payload.eventType === 'UPDATE') setTestimonials(prev => prev.map((item: any) => String(item.id) === String(payload.new.id) ? payload.new : item));
+      }).subscribe();
+
     const blogsSubscription = supabase.channel('public:blogs')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'blogs' }, (payload) => {
         if (payload.eventType === 'INSERT') setBlogs(prev => [payload.new, ...prev]);
@@ -218,14 +278,14 @@ export default function AdminDashboard() {
           setLogs(prev => [payload.new, ...prev].slice(0, 100));
       }).subscribe();
 
-    // Auto-refresh data every 1 minute
     const refreshInterval = setInterval(() => {
       initDashboard();
-    }, 60000);
+    }, 10000);
 
     return () => {
       supabase.removeChannel(leadsSubscription);
       supabase.removeChannel(subscribersSubscription);
+      supabase.removeChannel(testimonialsSubscription);
       supabase.removeChannel(blogsSubscription);
       supabase.removeChannel(logsSubscription);
       clearInterval(refreshInterval);
@@ -765,6 +825,7 @@ export default function AdminDashboard() {
     { id: 'logs', label: 'Activity Logs', mobileLabel: 'Logs', icon: Activity, show: !!currentAdmin?.is_master || !!currentAdmin?.permissions?.logs },
     { id: 'settings', label: 'Settings', mobileLabel: 'Settings', icon: Settings, show: !!currentAdmin?.permissions?.settings },
     { id: 'blogs', label: 'Blogs', mobileLabel: 'Blogs', icon: FileText, show: currentAdmin?.permissions?.blogs !== false },
+    { id: 'reviews', label: 'Reviews', mobileLabel: 'Reviews', icon: Star, show: true },
     { id: 'manage_admins', label: 'Manage Admins', mobileLabel: 'Admins', icon: LogOut, show: true }
   ];
 
@@ -983,14 +1044,14 @@ export default function AdminDashboard() {
           </div>
 
           <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/10 border border-cyan-500/20 rounded-xl p-6 mb-8">
-            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-cyan-400" /> Compose Broadcast (Demo)</h2>
+            <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Mail size={20} className="text-cyan-400" /> Compose Broadcast</h2>
             <div className="space-y-4">
-              <input type="text" placeholder="Email Subject" className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-400" />
-              <textarea placeholder="Write your newsletter content here..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-400" />
+              <input type="text" value={broadcastSubject} onChange={e => setBroadcastSubject(e.target.value)} placeholder="Email Subject" className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-400" />
+              <textarea value={broadcastContent} onChange={e => setBroadcastContent(e.target.value)} placeholder="Write your newsletter content here..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-400" />
               <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-                <span className="text-xs text-gray-500">This will be sent to all {subscribers.length} subscribers. (Demo Mode: Emails won't actually send)</span>
-                <button onClick={() => alert('Demo Mode: In production, this would dispatch emails via SendGrid/EmailJS.')} className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-bold uppercase tracking-wider rounded-lg text-sm transition-colors whitespace-nowrap">
-                  Send Broadcast
+                <span className="text-xs text-gray-500">This will be sent to all {subscribers.length} subscribers. (Note: Resend free tier may limit delivery to unverified emails)</span>
+                <button onClick={handleSendBroadcast} disabled={isBroadcasting} className="px-6 py-2 bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold uppercase tracking-wider rounded-lg text-sm transition-colors whitespace-nowrap">
+                  {isBroadcasting ? 'Sending...' : 'Send Broadcast'}
                 </button>
               </div>
             </div>
@@ -1914,8 +1975,14 @@ export default function AdminDashboard() {
 
           {editingBlog !== null && (
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-lg mb-8">
-              <h2 className="text-xl font-bold text-white mb-6">{editingBlog ? 'Edit Blog' : 'Create New Blog'}</h2>
-              <form onSubmit={handleSaveBlog} className="space-y-4">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-white">{editingBlog ? 'Edit Blog' : 'Create New Blog'}</h2>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => setEditingBlog(null)} className="px-4 py-2 border border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white rounded-lg font-medium transition-colors text-sm">Cancel</button>
+                  <button type="submit" form="blog-form" className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-white rounded-lg font-medium transition-colors text-sm">Save</button>
+                </div>
+              </div>
+              <form id="blog-form" onSubmit={handleSaveBlog} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
                   <input type="text" required value={blogForm.title} onChange={e => setBlogForm({...blogForm, title: e.target.value})} className="w-full bg-black/20 border border-white/10 backdrop-blur-sm text-white rounded-lg px-4 py-2 focus:outline-none focus:border-cyan-400" />
@@ -1967,12 +2034,17 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <div className="text-white font-medium truncate">{blog.title}</div>
-                      <div className="text-gray-500 text-xs">{blog.date}</div>
+                      <div className="text-gray-500 text-xs">{blog.created_at ? new Date(blog.created_at).toLocaleDateString() : ''}</div>
                     </div>
                   </div>
-                  <div className="pt-3 border-t border-gray-800 flex justify-end gap-2">
-                    <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name }); }} className="text-cyan-400 hover:text-cyan-400 text-xs font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors">Edit</button>
-                    <button onClick={() => handleDeleteBlog(blog.id)} className="text-red-500 hover:text-red-400 text-xs font-medium px-3 py-1.5 border border-red-500/30 hover:border-red-400 rounded-lg transition-colors">Delete</button>
+                  <div className="pt-3 border-t border-gray-800 flex justify-between items-center">
+                    <div className="text-xs text-cyan-400 font-medium bg-cyan-400/10 px-2 py-1 rounded">
+                      {blog.views || 0} Views
+                    </div>
+                    <div className="flex gap-2">
+                      <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name }); }} className="text-cyan-400 hover:text-cyan-400 text-xs font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors">Edit</button>
+                      <button onClick={() => handleDeleteBlog(blog.id)} className="text-red-500 hover:text-red-400 text-xs font-medium px-3 py-1.5 border border-red-500/30 hover:border-red-400 rounded-lg transition-colors">Delete</button>
+                    </div>
                   </div>
                 </div>
               )) : (
@@ -1997,6 +2069,7 @@ export default function AdminDashboard() {
                       />
                     </th>
                     <th className="py-3 px-4 text-gray-400 font-medium">Title</th>
+                    <th className="py-3 px-4 text-gray-400 font-medium text-center">Views</th>
                     <th className="py-3 px-4 text-gray-400 font-medium text-right">Date</th>
                     <th className="py-3 px-4 text-gray-400 font-medium text-right">Actions</th>
                   </tr>
@@ -2016,7 +2089,12 @@ export default function AdminDashboard() {
                         />
                       </td>
                       <td className="py-4 px-4 text-white font-medium">{blog.title}</td>
-                      <td className="py-4 px-4 text-gray-500 text-right">{blog.date}</td>
+                      <td className="py-4 px-4 text-center">
+                        <span className="bg-cyan-500/10 text-cyan-400 px-2 py-1 rounded text-xs font-medium">
+                          {blog.views || 0}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right text-gray-400">{blog.created_at ? new Date(blog.created_at).toLocaleDateString() : ''}</td>
                       <td className="py-4 px-4 text-right">
                         <button onClick={() => { setEditingBlog(blog); setBlogForm({ ...blog, authorName: blog.author_name }); }} className="text-cyan-400 hover:text-cyan-400 text-sm font-medium px-3 py-1.5 border border-cyan-400/30 hover:border-cyan-400 rounded-lg transition-colors mr-2">Edit</button>
                         <button onClick={() => handleDeleteBlog(blog.id)} className="text-red-500 hover:text-red-400 text-sm font-medium px-3 py-1.5 border border-red-500/30 hover:border-red-400 rounded-lg transition-colors">Delete</button>
@@ -2024,6 +2102,84 @@ export default function AdminDashboard() {
                     </tr>
                   )) : (
                     <tr><td colSpan="3" className="py-8 text-center text-gray-500">No blogs created yet.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </motion.div>
+      );
+    }
+
+    if (activeTab === 'reviews') {
+      const handleUpdateReviewStatus = async (id: string, status: string) => {
+        try {
+          const { error } = await supabase.from('testimonials').update({ status }).eq('id', id);
+          if (error) throw error;
+          toast.success(`Review ${status} successfully!`);
+        } catch (e: any) {
+          toast.error("Failed to update review status.");
+        }
+      };
+
+      const handleDeleteReview = async (id: string) => {
+        if (!window.confirm("Are you sure you want to delete this review?")) return;
+        try {
+          const { error } = await supabase.from('testimonials').delete().eq('id', id);
+          if (error) throw error;
+          toast.success("Review deleted successfully!");
+        } catch (e: any) {
+          toast.error("Failed to delete review.");
+        }
+      };
+
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold text-white">Client Reviews</h1>
+          </div>
+
+          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 shadow-lg">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-800 text-gray-400 text-sm">
+                    <th className="py-3 px-4 font-semibold uppercase tracking-wider">Client</th>
+                    <th className="py-3 px-4 font-semibold uppercase tracking-wider">Review</th>
+                    <th className="py-3 px-4 font-semibold uppercase tracking-wider text-center">Status</th>
+                    <th className="py-3 px-4 font-semibold uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {testimonials.length > 0 ? testimonials.map((review) => (
+                    <tr key={review.id} className="hover:bg-white/5 transition-colors group">
+                      <td className="py-4 px-4 text-white font-medium">
+                        {review.name}
+                        {review.company && <div className="text-xs text-gray-400">{review.company}</div>}
+                      </td>
+                      <td className="py-4 px-4 text-gray-300 max-w-xs truncate" title={review.content}>
+                        {review.content}
+                      </td>
+                      <td className="py-4 px-4 text-center">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${review.status === 'approved' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
+                          {review.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        {review.status === 'pending' ? (
+                          <button onClick={() => handleUpdateReviewStatus(review.id, 'approved')} className="text-green-400 hover:text-green-300 mr-3" title="Approve"><CheckCircle className="w-5 h-5 inline" /></button>
+                        ) : (
+                          <button onClick={() => handleUpdateReviewStatus(review.id, 'pending')} className="text-yellow-400 hover:text-yellow-300 mr-3" title="Mark Pending"><EyeOff className="w-5 h-5 inline" /></button>
+                        )}
+                        <button onClick={() => handleDeleteReview(review.id)} className="text-red-500 hover:text-red-400" title="Delete"><XCircle className="w-5 h-5 inline" /></button>
+                      </td>
+                    </tr>
+                  )) : (
+                    <tr><td colSpan="5" className="py-8 text-center text-gray-500">No reviews found.</td></tr>
                   )}
                 </tbody>
               </table>

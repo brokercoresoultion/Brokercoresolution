@@ -153,12 +153,15 @@ const Hero = ({ openDemoModal }) => {
                 initial={{ opacity: 1, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-[3.5rem] font-[800] text-gray-900 dark:text-white leading-[1.1] tracking-tight mb-4 drop-shadow-2xl"
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-[4.5rem] font-[800] leading-[1.05] tracking-tighter mb-6 drop-shadow-2xl"
               >
-                <span className="block translate-z-[20px] shadow-black/50">{t('hero.headingLine1')}</span>
-                <span className="block mt-2 translate-z-[40px]">
-                  {t('hero.headingLine2')}{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan to-white italic font-light pr-2">
+                <span className="block translate-z-[20px] text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400 drop-shadow-lg pb-1">
+                  {t('hero.headingLine1')}
+                </span>
+                <span className="block mt-2 translate-z-[40px] text-gray-900 dark:text-white text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] leading-[1.1]">
+                  {t('hero.headingLine2')}
+                  <br className="hidden sm:block" />
+                  <span className="inline-block mt-2 sm:mt-3 text-transparent bg-clip-text bg-gradient-to-r from-accent-cyan via-[#00f2fe] to-white italic font-light pr-2 drop-shadow-[0_0_15px_rgba(0,229,255,0.5)]">
                     {t('hero.headingAccent')}
                   </span>
                 </span>

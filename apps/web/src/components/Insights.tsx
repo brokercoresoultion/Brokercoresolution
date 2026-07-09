@@ -1,14 +1,36 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { blogData } from '../data/blogData';
+import { blogData as fallbackBlogData } from '../data/blogData';
+import { supabase } from '@/lib/supabase';
 import OptimizedImage from './OptimizedImage';
 
 const Insights = () => {
   const navigate = useNavigate();
-  // Get first 3 posts
-  const insights = blogData.slice(0, 3);
+  // State for insights, defaulting to fallback
+  const [insights, setInsights] = useState<any[]>(fallbackBlogData.slice(0, 3));
+
+  useEffect(() => {
+    const fetchBlogs = async () => {
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3);
+        
+      if (data && data.length > 0) {
+        setInsights(data.map(b => ({
+          title: b.title,
+          slug: b.slug,
+          category: b.category || 'Updates',
+          date: new Date(b.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+          image: b.cover_image || 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800'
+        })));
+      }
+    };
+    fetchBlogs();
+  }, []);
   return (
     <section id="insights" className="py-24">
       <div className="container mx-auto px-6">

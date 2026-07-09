@@ -2,61 +2,32 @@ import React, { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight, Quote, Plus, X } from 'lucide-react';
 import { toast } from "@/components/ui/use-toast";
 
-const initialTestimonials = [
-  {
-    id: 1,
-    name: 'Tariq Al-Fayed',
-    content: 'Broker Core Solution lives up to its name. They provided the foundational core our brokerage needed—from rapid corporate structuring to a flawless MT5 turnkey deployment. The operational stability has been exceptional from day one.',
-  },
-  {
-    id: 2,
-    name: 'Elena Rostova',
-    content: 'Building an institutional framework from scratch was daunting until we partnered with Broker Core Solution. Their CySEC-ready infrastructure became the core of our operations, cutting our time-to-market by 70%. A truly indispensable B2B partner.',
-  },
-  {
-    id: 3,
-    name: 'Wei Chen',
-    content: 'The backend ecosystem provided by Broker Core Solution is phenomenal. They delivered a true \'core solution\' where our CRM, liquidity pools, and payment gateways operate in perfect sync, completely automating our client workflows.',
-  },
-  {
-    id: 4,
-    name: 'Marcus Thorne',
-    content: 'As a proprietary trading firm, a robust core infrastructure is non-negotiable. Broker Core Solution’s Institutional liquidity bridges and optimized latency VPS have handled our high-frequency EA trading volume flawlessly without a single bottleneck.',
-  },
-  {
-    id: 5,
-    name: 'Hiroshi Tanaka',
-    content: 'We needed a highly reliable bridging solution for our APAC clients. Broker Core Solution delivered an incredibly stable environment with execution speeds that easily surpassed our expectations.',
-  },
-  {
-    id: 6,
-    name: 'Johan Müller',
-    content: 'The compliance and regulatory tools baked into the CRM are world-class. It saves us countless hours in KYC processing and keeps our operations perfectly aligned with European standards.',
-  },
-  {
-    id: 7,
-    name: 'Sarah Jenkins',
-    content: 'From zero to fully operational in 3 weeks! The white-label MT5 solution was customized perfectly to our brand. Their 24/7 technical support team is always just a message away.',
-  },
-  {
-    id: 8,
-    name: 'Nkosi Buthelezi',
-    content: 'Integrating our educational platform with their trading infrastructure was seamless. Our students now practice in a live environment that mirrors institutional trading conditions exactly.',
-  },
-  {
-    id: 9,
-    name: 'Michael O\'Connor',
-    content: 'The multi-venue liquidity aggregation engine is phenomenal. It dynamically routes our large block orders to minimize slippage. Broker Core Solution is an invaluable technology partner.',
-  }
-];
+import { supabase } from '@/lib/supabase';
 
 const Testimonials = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [reviews, setReviews] = useState(initialTestimonials);
+  const [reviews, setReviews] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', content: '' });
+  const [formData, setFormData] = useState({ name: '', company: '', content: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    const { data, error } = await supabase
+      .from('testimonials')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
+    
+    if (data && !error) {
+      setReviews(data);
+    }
+  };
 
   useEffect(() => {
     const updateItemsPerPage = () => {
@@ -96,28 +67,34 @@ const Testimonials = () => {
     }
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.content) return;
     
-    const newReview = {
-      id: Date.now(),
+    setIsSubmitting(true);
+    const { error } = await supabase.from('testimonials').insert({
       name: formData.name,
+      company: formData.company,
       content: formData.content,
-    };
+      status: 'pending'
+    });
+    setIsSubmitting(false);
 
-    setReviews([newReview, ...reviews]);
-    setIsModalOpen(false);
-    setFormData({ name: '', content: '' });
-    setCurrentIndex(0);
-    
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Could not submit review. Please try again.",
+        variant: "destructive"
+      });
+      return;
     }
 
+    setIsModalOpen(false);
+    setFormData({ name: '', company: '', content: '' });
+    
     toast({
       title: "Review Submitted!",
-      description: "Thank you for your feedback. It has been added successfully.",
+      description: "Thank you for your feedback. It is pending admin approval.",
     });
   };
 
@@ -173,20 +150,18 @@ const Testimonials = () => {
                 <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-br from-white/10 to-transparent rounded-bl-full -mr-24 -mt-24 transition-transform duration-700 group-hover:scale-110"></div>
                 
                 <Quote className="w-10 h-10 text-accent-cyan/40 dark:text-accent-cyan/20 mb-6 group-hover:text-accent-cyan/60 dark:group-hover:text-accent-cyan/40 transition-colors duration-500" />
-                
-                <p className="text-gray-800 dark:text-white text-lg md:text-xl leading-relaxed font-light mb-8 flex-grow">
+
+                <p className="text-gray-800 dark:text-gray-300 text-lg md:text-xl leading-relaxed font-light mb-8 flex-grow">
                   "{testimonial.content}"
                 </p>
 
-                <div className="flex items-center mt-auto">
-                  <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-accent-cyan/20 blur-md group-hover:bg-accent-cyan/40 transition-colors duration-500"></div>
-                    <div className="w-16 h-16 rounded-full mr-5 bg-accent-cyan/10 border-2 border-accent-cyan/30 relative z-10 flex items-center justify-center text-accent-cyan font-bold text-2xl">
-                      {testimonial.name.charAt(0).toUpperCase()}
-                    </div>
+                <div className="flex items-center gap-4 mt-auto">
+                  <div className="w-16 h-16 rounded-full bg-accent-cyan/10 border-2 border-accent-cyan/30 flex items-center justify-center text-accent-cyan font-bold text-2xl">
+                    {testimonial.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <p className="font-bold text-gray-900 dark:text-white tracking-wide text-lg">{testimonial.name}</p>
+                    {testimonial.company && <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.company}</p>}
                   </div>
                 </div>
               </div>
@@ -204,21 +179,20 @@ const Testimonials = () => {
             >
               <X size={24} />
             </button>
-            
             <h3 className="text-2xl font-bold text-white mb-6">Share Your Experience</h3>
             
             <form onSubmit={handleReviewSubmit} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Full Name</label>
-                <input 
-                  type="text" 
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-cyan"
-                  placeholder="John Doe"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Name</label>
+                  <input type="text" required value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-cyan" placeholder="John Doe" />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Company</label>
+                  <input type="text" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-cyan" placeholder="Company Name" />
+                </div>
               </div>
+
               <div>
                 <label className="block text-xs font-semibold uppercase text-gray-400 mb-2">Your Review</label>
                 <textarea 
@@ -228,14 +202,24 @@ const Testimonials = () => {
                   onChange={(e) => setFormData({...formData, content: e.target.value})}
                   className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-cyan resize-none"
                   placeholder="How did BrokerCore help your business?"
-                />
+                ></textarea>
               </div>
-              <button 
-                type="submit"
-                className="w-full bg-accent-cyan hover:bg-accent-cyan/90 text-black font-bold rounded-xl px-4 py-3 transition-colors mt-4"
-              >
-                Submit Review
-              </button>
+              <div className="flex gap-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-semibold rounded-xl px-4 py-3 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-accent-cyan hover:bg-accent-cyan/90 text-black font-bold rounded-xl px-4 py-3 transition-colors disabled:opacity-50"
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </div>
             </form>
           </div>
         </div>
